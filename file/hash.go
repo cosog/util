@@ -1,5 +1,5 @@
 // hash_file
-package util_hash
+package util_file
 
 import (
 	"crypto/sha256"
