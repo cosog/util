@@ -9,8 +9,6 @@ import (
 	//	"fmt"
 )
 
-const G float64 = 9.8
-const XDivide int = 30
 const CalculationError float64 = 1e-9
 
 func FormatOutput(o interface{}) {
