@@ -29,3 +29,9 @@ func StringLengthCut(v *[]string, length int) {
 		*v = append((*v)[:0], (*v)[len(*v)-length:]...)
 	}
 }
+func IntLengthCut(v *[]int, length int) {
+
+	if len(*v) > length {
+		*v = append((*v)[:0], (*v)[len(*v)-length:]...)
+	}
+}
