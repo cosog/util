@@ -15,7 +15,7 @@ func ReadFile(str string, r interface{}) {
 
 	if err != nil {
 		fmt.Println("open file fail:", err)
-
+		return
 	}
 	defer f.Close()
 
@@ -39,5 +39,5 @@ func ReadFile(str string, r interface{}) {
 
 	json.Unmarshal(s, r)
 
-	f.Close()
+	// f.Close()
 }

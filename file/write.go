@@ -13,7 +13,7 @@ func WriteFile(str string, w interface{}) {
 	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		fmt.Println("open file fail:", err)
-
+		return
 	}
 	defer f.Close()
 	f.Truncate(0)
@@ -31,14 +31,14 @@ func WriteFile(str string, w interface{}) {
 		runtime.Gosched()
 	}
 
-	f.Close()
+	// f.Close()
 }
 func WriteFileZip(str string, w interface{}) {
 
 	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		fmt.Println("open file fail:", err)
-
+		return
 	}
 	defer f.Close()
 	f.Truncate(0)
@@ -57,5 +57,5 @@ func WriteFileZip(str string, w interface{}) {
 		runtime.Gosched()
 	}
 
-	f.Close()
+	// f.Close()
 }
