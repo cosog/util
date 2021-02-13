@@ -10,7 +10,7 @@ import (
 
 func WriteFile(str string, w interface{}) {
 
-	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE, 0666)
+	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE|os.O_SYNC, 0666)
 	if err != nil {
 		fmt.Println("open file fail:", err)
 		return
@@ -35,7 +35,7 @@ func WriteFile(str string, w interface{}) {
 }
 func WriteFileZip(str string, w interface{}) {
 
-	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE, 0666)
+	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE|os.O_SYNC, 0666)
 	if err != nil {
 		fmt.Println("open file fail:", err)
 		return
