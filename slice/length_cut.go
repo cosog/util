@@ -35,3 +35,9 @@ func IntLengthCut(v *[]int, length int) {
 		*v = append((*v)[:0], (*v)[len(*v)-length:]...)
 	}
 }
+func Int64LengthCut(v *[]int64, length int) {
+
+	if len(*v) > length {
+		*v = append((*v)[:0], (*v)[len(*v)-length:]...)
+	}
+}
