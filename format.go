@@ -28,16 +28,6 @@ func FormatOutput(o interface{}) {
 	for i := 0; i < v.NumField(); i++ {
 		switch v.Field(i).Kind() {
 
-		case reflect.Float64:
-			if (math.Abs(v.Field(i).Float()) - 1) > CalculationError {
-				a := strconv.FormatFloat(v.Field(i).Float(), 'f', 2, 64)
-				f, _ := strconv.ParseFloat(a, 64)
-				v.Field(i).SetFloat(f)
-			} else {
-				a := strconv.FormatFloat(v.Field(i).Float(), 'e', 2, 64)
-				f, _ := strconv.ParseFloat(a, 64)
-				v.Field(i).SetFloat(f)
-			}
 		case reflect.Float32:
 			if (math.Abs(v.Field(i).Float()) - 1) > CalculationError {
 				a := strconv.FormatFloat(v.Field(i).Float(), 'f', 2, 32)
@@ -48,9 +38,30 @@ func FormatOutput(o interface{}) {
 				f, _ := strconv.ParseFloat(a, 32)
 				v.Field(i).SetFloat(f)
 			}
+		case reflect.Float64:
+			if (math.Abs(v.Field(i).Float()) - 1) > CalculationError {
+				a := strconv.FormatFloat(v.Field(i).Float(), 'f', 2, 64)
+				f, _ := strconv.ParseFloat(a, 64)
+				v.Field(i).SetFloat(f)
+			} else {
+				a := strconv.FormatFloat(v.Field(i).Float(), 'e', 2, 64)
+				f, _ := strconv.ParseFloat(a, 64)
+				v.Field(i).SetFloat(f)
+			}
+
 		case reflect.Struct:
 			for j := 0; j < v.Field(i).NumField(); j++ {
 				switch v.Field(i).Field(j).Kind() {
+				case reflect.Float32:
+					if (math.Abs(v.Field(i).Field(j).Float()) - 1) > CalculationError {
+						a := strconv.FormatFloat(v.Field(i).Field(j).Float(), 'f', 2, 32)
+						f, _ := strconv.ParseFloat(a, 32)
+						v.Field(i).Field(j).SetFloat(f)
+					} else {
+						a := strconv.FormatFloat(v.Field(i).Field(j).Float(), 'e', 2, 32)
+						f, _ := strconv.ParseFloat(a, 32)
+						v.Field(i).Field(j).SetFloat(f)
+					}
 				case reflect.Float64:
 					if (math.Abs(v.Field(i).Field(j).Float()) - 1) > CalculationError {
 						a := strconv.FormatFloat(v.Field(i).Field(j).Float(), 'f', 2, 64)
@@ -64,6 +75,16 @@ func FormatOutput(o interface{}) {
 				case reflect.Struct:
 					for k := 0; k < v.Field(i).Field(j).NumField(); k++ {
 						switch v.Field(i).Field(j).Field(k).Kind() {
+						case reflect.Float32:
+							if (math.Abs(v.Field(i).Field(j).Field(k).Float()) - 1) > CalculationError {
+								a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Float(), 'f', 2, 32)
+								f, _ := strconv.ParseFloat(a, 32)
+								v.Field(i).Field(j).Field(k).SetFloat(f)
+							} else {
+								a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Float(), 'e', 2, 32)
+								f, _ := strconv.ParseFloat(a, 32)
+								v.Field(i).Field(j).Field(k).SetFloat(f)
+							}
 						case reflect.Float64:
 							if (math.Abs(v.Field(i).Field(j).Field(k).Float()) - 1) > CalculationError {
 								a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Float(), 'f', 2, 64)
@@ -77,6 +98,16 @@ func FormatOutput(o interface{}) {
 						case reflect.Slice:
 							for m := 0; m < v.Field(i).Field(j).Field(k).Len(); m++ {
 								switch v.Field(i).Field(j).Field(k).Index(m).Kind() {
+								case reflect.Float32:
+									if (math.Abs(v.Field(i).Field(j).Field(k).Index(m).Float()) - 1) > CalculationError {
+										a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Index(m).Float(), 'f', 2, 32)
+										f, _ := strconv.ParseFloat(a, 32)
+										v.Field(i).Field(j).Field(k).Index(m).SetFloat(f)
+									} else {
+										a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Index(m).Float(), 'e', 2, 32)
+										f, _ := strconv.ParseFloat(a, 32)
+										v.Field(i).Field(j).Field(k).Index(m).SetFloat(f)
+									}
 								case reflect.Float64:
 									if (math.Abs(v.Field(i).Field(j).Field(k).Index(m).Float()) - 1) > CalculationError {
 										a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Index(m).Float(), 'f', 2, 64)
@@ -90,6 +121,16 @@ func FormatOutput(o interface{}) {
 								case reflect.Struct:
 									for n := 0; n < v.Field(i).Field(j).Field(k).Index(m).NumField(); n++ {
 										switch v.Field(i).Field(j).Field(k).Index(m).Field(n).Kind() {
+										case reflect.Float32:
+											if (math.Abs(v.Field(i).Field(j).Field(k).Index(m).Field(n).Float()) - 1) > CalculationError {
+												a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Index(m).Field(n).Float(), 'f', 2, 32)
+												f, _ := strconv.ParseFloat(a, 32)
+												v.Field(i).Field(j).Field(k).Index(m).Field(n).SetFloat(f)
+											} else {
+												a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Index(m).Field(n).Float(), 'e', 2, 32)
+												f, _ := strconv.ParseFloat(a, 32)
+												v.Field(i).Field(j).Field(k).Index(m).Field(n).SetFloat(f)
+											}
 										case reflect.Float64:
 											if (math.Abs(v.Field(i).Field(j).Field(k).Index(m).Field(n).Float()) - 1) > CalculationError {
 												a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Index(m).Field(n).Float(), 'f', 2, 64)
@@ -111,6 +152,16 @@ func FormatOutput(o interface{}) {
 						case reflect.Struct:
 							for m := 0; m < v.Field(i).Field(j).Field(k).NumField(); m++ {
 								switch v.Field(i).Field(j).Field(k).Field(m).Kind() {
+								case reflect.Float32:
+									if (math.Abs(v.Field(i).Field(j).Field(k).Field(m).Float()) - 1) > CalculationError {
+										a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Field(m).Float(), 'f', 2, 32)
+										f, _ := strconv.ParseFloat(a, 32)
+										v.Field(i).Field(j).Field(k).Field(m).SetFloat(f)
+									} else {
+										a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Field(m).Float(), 'e', 2, 32)
+										f, _ := strconv.ParseFloat(a, 32)
+										v.Field(i).Field(j).Field(k).Field(m).SetFloat(f)
+									}
 								case reflect.Float64:
 									if (math.Abs(v.Field(i).Field(j).Field(k).Field(m).Float()) - 1) > CalculationError {
 										a := strconv.FormatFloat(v.Field(i).Field(j).Field(k).Field(m).Float(), 'f', 2, 64)
@@ -131,6 +182,16 @@ func FormatOutput(o interface{}) {
 				case reflect.Slice:
 					for k := 0; k < v.Field(i).Field(j).Len(); k++ {
 						switch v.Field(i).Field(j).Index(k).Kind() {
+						case reflect.Float32:
+							if (math.Abs(v.Field(i).Field(j).Index(k).Float()) - 1) > CalculationError {
+								a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Float(), 'f', 2, 32)
+								f, _ := strconv.ParseFloat(a, 32)
+								v.Field(i).Field(j).Index(k).SetFloat(f)
+							} else {
+								a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Float(), 'e', 2, 32)
+								f, _ := strconv.ParseFloat(a, 32)
+								v.Field(i).Field(j).Index(k).SetFloat(f)
+							}
 						case reflect.Float64:
 							if (math.Abs(v.Field(i).Field(j).Index(k).Float()) - 1) > CalculationError {
 								a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Float(), 'f', 2, 64)
@@ -144,6 +205,16 @@ func FormatOutput(o interface{}) {
 						case reflect.Struct:
 							for m := 0; m < v.Field(i).Field(j).Index(k).NumField(); m++ {
 								switch v.Field(i).Field(j).Index(k).Field(m).Kind() {
+								case reflect.Float32:
+									if (math.Abs(v.Field(i).Field(j).Index(k).Field(m).Float()) - 1) > CalculationError {
+										a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Field(m).Float(), 'f', 2, 32)
+										f, _ := strconv.ParseFloat(a, 32)
+										v.Field(i).Field(j).Index(k).Field(m).SetFloat(f)
+									} else {
+										a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Field(m).Float(), 'e', 2, 32)
+										f, _ := strconv.ParseFloat(a, 32)
+										v.Field(i).Field(j).Index(k).Field(m).SetFloat(f)
+									}
 								case reflect.Float64:
 									if (math.Abs(v.Field(i).Field(j).Index(k).Field(m).Float()) - 1) > CalculationError {
 										a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Field(m).Float(), 'f', 2, 64)
