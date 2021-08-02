@@ -182,6 +182,7 @@ func FormatOutput(o interface{}) {
 				case reflect.Slice:
 					for k := 0; k < v.Field(i).Field(j).Len(); k++ {
 						switch v.Field(i).Field(j).Index(k).Kind() {
+
 						case reflect.Float32:
 							if (math.Abs(v.Field(i).Field(j).Index(k).Float()) - 1) > CalculationError {
 								a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Float(), 'f', 2, 32)
