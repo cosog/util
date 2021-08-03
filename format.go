@@ -183,6 +183,8 @@ func FormatOutput(o interface{}) {
 					for k := 0; k < v.Field(i).Field(j).Len(); k++ {
 						switch v.Field(i).Field(j).Index(k).Kind() {
 
+						case reflect.Interface:
+
 						case reflect.Float32:
 							if (math.Abs(v.Field(i).Field(j).Index(k).Float()) - 1) > CalculationError {
 								a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Float(), 'f', 2, 32)
@@ -193,6 +195,7 @@ func FormatOutput(o interface{}) {
 								f, _ := strconv.ParseFloat(a, 32)
 								v.Field(i).Field(j).Index(k).SetFloat(f)
 							}
+
 						case reflect.Float64:
 							if (math.Abs(v.Field(i).Field(j).Index(k).Float()) - 1) > CalculationError {
 								a := strconv.FormatFloat(v.Field(i).Field(j).Index(k).Float(), 'f', 2, 64)
@@ -259,6 +262,42 @@ func FormatOutput(o interface{}) {
 						f, _ := strconv.ParseFloat(a, 64)
 						v.Field(i).Index(j).SetFloat(f)
 					}
+				case reflect.Interface:
+					v_o := reflect.ValueOf(v.Field(i).Index(j))
+					if v_o.Kind() != reflect.Ptr || !v_o.Elem().CanSet() {
+						return
+					} else {
+						v_o = v_o.Elem()
+					}
+					switch v_o.Kind() {
+					case reflect.Slice:
+						for i := 0; i < v_o.Len(); i++ {
+							switch v_o.Index(i).Kind() {
+							case reflect.Float32:
+								if (math.Abs(v_o.Index(i).Float()) - 1) > CalculationError {
+									a := strconv.FormatFloat(v_o.Index(i).Float(), 'f', 2, 32)
+									f, _ := strconv.ParseFloat(a, 32)
+									v_o.Index(i).SetFloat(f)
+								} else {
+									a := strconv.FormatFloat(v_o.Index(i).Float(), 'e', 2, 32)
+									f, _ := strconv.ParseFloat(a, 32)
+									v_o.Index(i).SetFloat(f)
+								}
+							case reflect.Float64:
+								if (math.Abs(v_o.Index(i).Float()) - 1) > CalculationError {
+									a := strconv.FormatFloat(v_o.Index(i).Float(), 'f', 2, 64)
+									f, _ := strconv.ParseFloat(a, 64)
+									v_o.Index(i).SetFloat(f)
+								} else {
+									a := strconv.FormatFloat(v_o.Index(i).Float(), 'e', 2, 64)
+									f, _ := strconv.ParseFloat(a, 64)
+									v_o.Index(i).SetFloat(f)
+								}
+							}
+						}
+
+					}
+
 				case reflect.Slice:
 					for k := 0; k < v.Field(i).Index(j).Len(); k++ {
 						switch v.Field(i).Index(j).Index(k).Kind() {
