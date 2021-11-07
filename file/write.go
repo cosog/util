@@ -59,3 +59,28 @@ func WriteFileZip(str string, w interface{}) {
 
 	// f.Close()
 }
+func WriteFileByte(str string, w []byte) {
+
+	f, err := os.OpenFile(str, os.O_RDWR|os.O_CREATE|os.O_SYNC, 0666)
+	if err != nil {
+		fmt.Println("open file fail:", err)
+		return
+	}
+	defer f.Close()
+	f.Truncate(0)
+
+	// a, err := json.MarshalIndent(w, "", "	")
+
+	start := 0
+	for {
+		n, _ := f.Write(w[start:])
+		if n == len(w)-start {
+			break
+		} else {
+			start += n
+		}
+		runtime.Gosched()
+	}
+
+	// f.Close()
+}
