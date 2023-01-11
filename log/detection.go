@@ -3,7 +3,6 @@ package util_log
 
 import (
 	"io"
-	"io/fs"
 	"log"
 	"os"
 	"runtime"
@@ -12,9 +11,8 @@ import (
 	"time"
 )
 
-func OpenLogFile(path string, name string, writer string) (*os.File, fs.FileInfo) {
+func OpenLogFile(path string, name string, writer string) *os.File {
 
-	var fi fs.FileInfo
 	os.MkdirAll(path, os.ModePerm)
 	hour := strconv.Itoa(time.Now().Hour())
 	if time.Now().Hour() < 10 {
@@ -34,8 +32,8 @@ func OpenLogFile(path string, name string, writer string) (*os.File, fs.FileInfo
 		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file:", err)
-
 	} else {
+
 		switch strings.ToLower(writer) {
 		case "file":
 			log.SetFlags(log.Ldate | log.Lmicroseconds | log.Lshortfile)
@@ -53,26 +51,30 @@ func OpenLogFile(path string, name string, writer string) (*os.File, fs.FileInfo
 			log.SetOutput(io.MultiWriter())
 		}
 
-		fi, _ = file.Stat()
 	}
-	return file, fi
+	return file
 
 }
-func DetectionLogSize(file *os.File, fi fs.FileInfo, size int64, path string, name string, writer string) {
+func DetectionLogSize(file *os.File, size int64, path string, name string, writer string) {
+
 	Ticker := time.NewTicker(time.Duration(1) * time.Minute) //单位分钟		1
 	defer Ticker.Stop()
 
 	for {
 		select {
 		case <-Ticker.C:
-			if fi.Size() > size*1024*1024 { //50M
-				//关闭当前log文件，创建新log文件
-				file.Close()
-				file, fi = OpenLogFile(path, name, writer)
+			fi, err := file.Stat()
+			if err == nil {
+				if fi.Size() > size*1024*1024 { //50M
+					//关闭当前log文件，创建新log文件
+					file.Close()
+					file = OpenLogFile(path, name, writer)
+				}
 			}
 		}
 		runtime.Gosched()
 	}
+
 }
 func DetectionLogModTime(path string, name string) {
 	Ticker := time.NewTicker(time.Duration(24) * time.Hour) //小时
