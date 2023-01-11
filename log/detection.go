@@ -78,7 +78,7 @@ func DetectionLogSize(file *os.File, size int64, path string, name string, write
 
 }
 func DetectionLogModTime(path string, name string, day int64) {
-	Ticker := time.NewTicker(time.Duration(24) * time.Hour) //小时
+	Ticker := time.NewTicker(time.Duration(1) * time.Hour) //小时
 	defer Ticker.Stop()
 	// clearLogForwardUnix := 60 * 60 * 24 * day
 	clearLogForwardUnix := 60 * 60 * 1 * day
@@ -89,8 +89,9 @@ func DetectionLogModTime(path string, name string, day int64) {
 			for i := range fileInfoList {
 				// 判断文件是否空的
 				if fileInfoList[i].Size() == 64 || (time.Now().Unix()-clearLogForwardUnix) > fileInfoList[i].ModTime().Unix() {
-					delFile(path+"/"+fileInfoList[i].Name(), fileInfoList[i].IsDir())
-					continue
+					if strings.Contains(fileInfoList[i].Name(), name) == true && strings.Contains(fileInfoList[i].Name(), ".log") == true {
+						delFile(path+"/"+fileInfoList[i].Name(), fileInfoList[i].IsDir())
+					}
 				}
 				runtime.Gosched()
 			}
