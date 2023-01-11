@@ -17,7 +17,7 @@ func OpenLogFile(path string, name string, writer string) (*os.File, fs.FileInfo
 	var fi fs.FileInfo
 	os.MkdirAll(path, os.ModePerm)
 	file, err := os.OpenFile(path+"/"+name+"."+strconv.Itoa(time.Now().Year())+"-"+strconv.Itoa(int(time.Now().Month()))+"-"+
-		"-"+strconv.Itoa(time.Now().Day())+"_"+strconv.Itoa(time.Now().Hour())+strconv.Itoa(time.Now().Minute())+strconv.Itoa(time.Now().Second())+".log",
+		strconv.Itoa(time.Now().Day())+"_"+strconv.Itoa(time.Now().Hour())+strconv.Itoa(time.Now().Minute())+strconv.Itoa(time.Now().Second())+".log",
 		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file:", err)
