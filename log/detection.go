@@ -78,7 +78,7 @@ func DetectionLogSize(file *os.File, size int64, path string, name string, write
 
 }
 func DetectionLogModTime(path string, name string, day int64) {
-	Ticker := time.NewTicker(time.Duration(1) * time.Hour) //小时
+	Ticker := time.NewTicker(time.Duration(1) * time.Second) //小时
 	defer Ticker.Stop()
 	// clearLogForwardUnix := 60 * 60 * 24 * day
 	clearLogForwardUnix := 60 * 60 * 1 * day
@@ -95,16 +95,17 @@ func DetectionLogModTime(path string, name string, day int64) {
 				}
 				runtime.Gosched()
 			}
+			Ticker.Reset(time.Duration(1) * time.Hour)
 		}
 		runtime.Gosched()
 	}
 }
 
 // 删除文件
-func delFile(str string, i bool) {
+func delFile(str string, flag bool) {
 	log.Println("delFile ClearingExpiredLogs ---- START", str)
 	// 文件夹
-	if i {
+	if flag {
 		_ = os.RemoveAll(str)
 	} else {
 		_ = os.Remove(str)
