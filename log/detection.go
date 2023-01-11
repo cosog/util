@@ -16,8 +16,21 @@ func OpenLogFile(path string, name string, writer string) (*os.File, fs.FileInfo
 
 	var fi fs.FileInfo
 	os.MkdirAll(path, os.ModePerm)
+	hour := strconv.Itoa(time.Now().Hour())
+	if time.Now().Hour() < 10 {
+		hour = "0" + hour
+	}
+	minute := strconv.Itoa(time.Now().Minute())
+	if time.Now().Minute() < 10 {
+		minute = "0" + minute
+	}
+	second := strconv.Itoa(time.Now().Second())
+	if time.Now().Second() < 10 {
+		second = "0" + second
+	}
+
 	file, err := os.OpenFile(path+"/"+name+"."+strconv.Itoa(time.Now().Year())+"-"+strconv.Itoa(int(time.Now().Month()))+"-"+
-		strconv.Itoa(time.Now().Day())+"_"+strconv.Itoa(time.Now().Hour())+strconv.Itoa(time.Now().Minute())+strconv.Itoa(time.Now().Second())+".log",
+		strconv.Itoa(time.Now().Day())+"_"+hour+minute+second+".log",
 		os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
 	if err != nil {
 		log.Fatalln("Failed to open log file:", err)
@@ -45,14 +58,14 @@ func OpenLogFile(path string, name string, writer string) (*os.File, fs.FileInfo
 	return file, fi
 
 }
-func DetectionLogSize(file *os.File, fi fs.FileInfo, path string, name string, writer string) {
+func DetectionLogSize(file *os.File, fi fs.FileInfo, size int64, path string, name string, writer string) {
 	Ticker := time.NewTicker(time.Duration(1) * time.Minute) //单位分钟		1
 	defer Ticker.Stop()
 
 	for {
 		select {
 		case <-Ticker.C:
-			if fi.Size() > 50*1024*1024 { //50M
+			if fi.Size() > size*1024*1024 { //50M
 				//关闭当前log文件，创建新log文件
 				file.Close()
 				file, fi = OpenLogFile(path, name, writer)
