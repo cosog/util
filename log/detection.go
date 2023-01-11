@@ -85,9 +85,15 @@ func DetectionLogModTime(path string, name string, day int64) {
 	for {
 		select {
 		case <-Ticker.C:
+			Ticker.Reset(time.Duration(1) * time.Hour)
 			fileInfoList, _ := ioutil.ReadDir(path)
 			for i := range fileInfoList {
 				// 判断文件是否空的
+				if (time.Now().Unix() - clearLogForwardUnix) > fileInfoList[i].ModTime().Unix() {
+					log.Println("i,name true:", i, fileInfoList[i].Name())
+				} else {
+					log.Println("i,name false:", i, fileInfoList[i].Name())
+				}
 				if fileInfoList[i].Size() == 64 || (time.Now().Unix()-clearLogForwardUnix) > fileInfoList[i].ModTime().Unix() {
 					if strings.Contains(fileInfoList[i].Name(), name) == true && strings.Contains(fileInfoList[i].Name(), ".log") == true {
 						delFile(path+"/"+fileInfoList[i].Name(), fileInfoList[i].IsDir())
@@ -95,7 +101,6 @@ func DetectionLogModTime(path string, name string, day int64) {
 				}
 				runtime.Gosched()
 			}
-			Ticker.Reset(time.Duration(1) * time.Hour)
 		}
 		runtime.Gosched()
 	}
