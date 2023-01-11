@@ -3,6 +3,7 @@ package util_log
 
 import (
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"runtime"
@@ -76,15 +77,35 @@ func DetectionLogSize(file *os.File, size int64, path string, name string, write
 	}
 
 }
-func DetectionLogModTime(path string, name string) {
+func DetectionLogModTime(path string, name string, day int64) {
 	Ticker := time.NewTicker(time.Duration(24) * time.Hour) //小时
 	defer Ticker.Stop()
-
+	// clearLogForwardUnix := 60 * 60 * 24 * day
+	clearLogForwardUnix := 60 * 60 * 1 * day
 	for {
 		select {
 		case <-Ticker.C:
-
+			fileInfoList, _ := ioutil.ReadDir(path)
+			for i := range fileInfoList {
+				// 判断文件是否空的
+				if fileInfoList[i].Size() == 64 || (time.Now().Unix()-clearLogForwardUnix) > fileInfoList[i].ModTime().Unix() {
+					delFile(path+"/"+fileInfoList[i].Name(), fileInfoList[i].IsDir())
+					continue
+				}
+				runtime.Gosched()
+			}
 		}
 		runtime.Gosched()
+	}
+}
+
+// 删除文件
+func delFile(str string, i bool) {
+	log.Println("delFile ClearingExpiredLogs ---- START", str)
+	// 文件夹
+	if i {
+		_ = os.RemoveAll(str)
+	} else {
+		_ = os.Remove(str)
 	}
 }
