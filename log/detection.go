@@ -85,7 +85,7 @@ func DetectionLogModTime(path string, name string, day int64) {
 	for {
 		select {
 		case <-Ticker.C:
-			Ticker.Reset(time.Duration(24) * time.Hour)
+			Ticker.Reset(time.Duration(1) * time.Hour)
 			fileInfoList, _ := ioutil.ReadDir(path)
 			for i := range fileInfoList {
 				// 判断文件是否空的
