@@ -19,7 +19,8 @@ func FESInterpolationPoint(fes *FESStruct, targetCNT int) FESStruct {
 
 		for i := 0; i < targetCNT; i++ {
 			start = int(float64(i) * x)
-			if start == targetCNT-1 {
+			// if start == targetCNT-1 {
+			if start == fes.CNT-1 {
 				end = 0
 			} else {
 				end = start + 1
