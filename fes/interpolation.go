@@ -1,5 +1,5 @@
 // fesinterpolation.go
-package util_interpolation
+package util_fes
 
 import (
 	"math"

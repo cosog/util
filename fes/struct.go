@@ -1,5 +1,5 @@
 // struct.go
-package util_interpolation
+package util_fes
 
 type FESStruct struct {
 	AcqTime string    //采集时间

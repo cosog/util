@@ -1,5 +1,5 @@
 // storemodbusa11.go
-package util_interpolation
+package util_fes
 
 import (
 	"encoding/binary"
