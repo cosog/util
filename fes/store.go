@@ -11,6 +11,12 @@ import (
 )
 
 func StoreModbusA11(fes *FESStruct) []string {
+	var fesA11 FESStruct
+	if fes.CNT > 200 || len(fes.S) > 200 {
+		fesA11 = FESInterpolationPoint(fes, 200)
+	} else {
+		fesA11 = *fes
+	}
 
 	b := make([]byte, 0)
 	c := make([]byte, 0)
@@ -18,11 +24,11 @@ func StoreModbusA11(fes *FESStruct) []string {
 	var crc util_crc.Crc
 	var b_41001 []byte
 
-	cnt := uint16(fes.CNT)
+	cnt := uint16(fesA11.CNT)
 	b_40984 := make([]byte, 2)
 	binary.BigEndian.PutUint16(b_40984, cnt)
 
-	s := fes.AcqTime
+	s := fesA11.AcqTime
 	y1, _ := strconv.Atoi(string(s[0]))
 	y2, _ := strconv.Atoi(string(s[1]))
 	y3, _ := strconv.Atoi(string(s[2]))
@@ -58,11 +64,11 @@ func StoreModbusA11(fes *FESStruct) []string {
 
 	b_40991 := make([]byte, 4)
 
-	bits := math.Float32bits(float32(fes.SPM))
+	bits := math.Float32bits(float32(fesA11.SPM))
 	binary.BigEndian.PutUint32(b_40991, bits)
 
 	b_40993 := make([]byte, 4)
-	bits = math.Float32bits(float32(fes.Stroke))
+	bits = math.Float32bits(float32(fesA11.Stroke))
 
 	binary.BigEndian.PutUint32(b_40993, bits)
 
@@ -94,7 +100,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 		times := totalByteLength / sendRegisterLength / 2
 
 		b_41001 = make([]byte, totalByteLength)
-		for k, v := range fes.S {
+		for k, v := range fesA11.S {
 			high := 2 * k
 			low := 2*k + 1
 			b2 := make([]byte, 2)
@@ -102,7 +108,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 			b_41001[high] = b2[0]
 			b_41001[low] = b2[1]
 		}
-		for k, v := range fes.F {
+		for k, v := range fesA11.F {
 			high := 2*k + 500
 			low := 2*k + 1 + 500
 			b2 := make([]byte, 2)
@@ -111,7 +117,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 			b_41001[low] = b2[1]
 		}
 
-		for k, v := range fes.I {
+		for k, v := range fesA11.I {
 			high := 2*k + 1000
 			low := 2*k + 1 + 1000
 			b2 := make([]byte, 2)
@@ -119,7 +125,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 			b_41001[high] = b2[0]
 			b_41001[low] = b2[1]
 		}
-		for k, v := range fes.Watt {
+		for k, v := range fesA11.Watt {
 			high := 2*k + 1500
 			low := 2*k + 1 + 1500
 			b2 := make([]byte, 2)
@@ -166,7 +172,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 		times := totalByteLength / sendRegisterLength / 2
 
 		b_41001 = make([]byte, totalByteLength)
-		for k, v := range fes.S {
+		for k, v := range fesA11.S {
 			high := 2 * k
 			low := 2*k + 1
 			b2 := make([]byte, 2)
@@ -174,7 +180,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 			b_41001[high] = b2[0]
 			b_41001[low] = b2[1]
 		}
-		for k, v := range fes.F {
+		for k, v := range fesA11.F {
 			high := 2*k + 1000
 			low := 2*k + 1 + 1000
 			b2 := make([]byte, 2)
@@ -183,7 +189,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 			b_41001[low] = b2[1]
 		}
 
-		for k, v := range fes.I {
+		for k, v := range fesA11.I {
 			high := 2*k + 2000
 			low := 2*k + 1 + 2000
 			b2 := make([]byte, 2)
@@ -191,7 +197,7 @@ func StoreModbusA11(fes *FESStruct) []string {
 			b_41001[high] = b2[0]
 			b_41001[low] = b2[1]
 		}
-		for k, v := range fes.Watt {
+		for k, v := range fesA11.Watt {
 			high := 2*k + 3000
 			low := 2*k + 1 + 3000
 			b2 := make([]byte, 2)
