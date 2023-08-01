@@ -5,7 +5,7 @@ import (
 	"encoding/binary"
 )
 
-func decode_modbus_tcp(content string) (byte, int, interface{}, bool, bool, bool, bool) {
+func Decode_Modbus_TCP(content string) (byte, int, interface{}, bool, bool, bool, bool) {
 
 	// MBAP为报文头，长度为7字节
 	// 事务处理标识 ：可以理解为报文的序列号，一般每次通信之后就要加1以区别不同的通信数据报文。
@@ -207,7 +207,7 @@ func decode_modbus_tcp(content string) (byte, int, interface{}, bool, bool, bool
 	}
 	return slave, addr, value, m_err, exception_code_err, crc_err, filter
 }
-func decode_modbus_rtu(addr int, content string) (byte, int, interface{}, bool, bool, bool, bool) {
+func Decode_Modbus_RTU(addr int, content string) (byte, int, interface{}, bool, bool, bool, bool) {
 
 	var slave byte
 	var value interface{}
