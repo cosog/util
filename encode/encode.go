@@ -42,7 +42,13 @@ func Encode_ReadHoldingRegisters(protocolType string, storeDataType string, slav
 	}
 
 	sendQuantity := 100
-	times := quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+
+	var times int
+	if quantity%sendQuantity == 0 {
+		times = quantity / sendQuantity
+	} else {
+		times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+	}
 
 	for i := 0; i < times; i++ {
 
@@ -562,7 +568,13 @@ func Encode_ReadCoils(protocolType string, storeDataType string, slave byte, add
 	code = 0x01
 
 	sendQuantity := 1000
-	times := quantity/sendQuantity + 1 //当小于拆分发送数量时，按实际数量发送
+	var times int
+	if quantity%sendQuantity == 0 {
+		times = quantity / sendQuantity
+	} else {
+		times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+	}
+	// times := quantity/sendQuantity + 1 //当小于拆分发送数量时，按实际数量发送
 
 	for i := 0; i < times; i++ {
 
@@ -836,7 +848,13 @@ func Encode_ReadInputRegisters(protocolType string, storeDataType string, slave 
 	}
 
 	sendQuantity := 100
-	times := quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+	var times int
+	if quantity%sendQuantity == 0 {
+		times = quantity / sendQuantity
+	} else {
+		times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+	}
+	// times := quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
 
 	for i := 0; i < times; i++ {
 
@@ -910,7 +928,13 @@ func Encode_ReadDiscreteInputs(protocolType string, storeDataType string, slave 
 	code = 0x02
 
 	sendQuantity := 1000
-	times := quantity/sendQuantity + 1 //当小于拆分发送数量时，按实际数量发送
+	var times int
+	if quantity%sendQuantity == 0 {
+		times = quantity / sendQuantity
+	} else {
+		times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+	}
+	// times := quantity/sendQuantity + 1 //当小于拆分发送数量时，按实际数量发送
 
 	for i := 0; i < times; i++ {
 
