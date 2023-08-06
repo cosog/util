@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func read2(conn net.Conn, readTimeout int, w []byte) (err error) {
+func Read2(conn net.Conn, readTimeout int, w []byte) (err error) {
 	err = conn.SetReadDeadline(time.Now().Add(time.Duration(readTimeout) * time.Millisecond))
 	if err != nil {
 		return err
