@@ -53,8 +53,12 @@ func Encode_ReadHoldingRegisters(protocolType string, storeDataType string, slav
 	for i := 0; i < times; i++ {
 
 		addr_mbap = addr + i*sendQuantity
-		addr_pdu = addr - 1 - 40000 + i*sendQuantity
-
+		// addr_pdu = addr - 1 - 40000 + i*sendQuantity
+		if addr > 400000 {
+			addr_pdu = addr - 1 - 400000 + i*sendQuantity
+		} else {
+			addr_pdu = addr - 1 - 40000 + i*sendQuantity
+		}
 		if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
 			quantity_pdu = quantity - sendQuantity*i
 		} else {
@@ -120,7 +124,12 @@ func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDa
 	var addr_mbap int
 
 	addr_mbap = addr
-	addr_pdu = addr - 1 - 40000
+	// addr_pdu = addr - 1 - 40000
+	if addr > 400000 {
+		addr_pdu = addr - 1 - 400000
+	} else {
+		addr_pdu = addr - 1 - 40000
+	}
 
 	addr_mbap_b := make([]byte, 2)
 	addr_pdu_b := make([]byte, 2)
@@ -859,7 +868,12 @@ func Encode_ReadInputRegisters(protocolType string, storeDataType string, slave 
 	for i := 0; i < times; i++ {
 
 		addr_mbap = addr + i*sendQuantity
-		addr_pdu = addr - 1 - 30000 + i*sendQuantity
+		if addr > 300000 {
+			addr_pdu = addr - 1 - 300000 + i*sendQuantity
+		} else {
+			addr_pdu = addr - 1 - 30000 + i*sendQuantity
+		}
+
 		if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
 			quantity_pdu = quantity - sendQuantity*i
 		} else {
@@ -939,7 +953,12 @@ func Encode_ReadDiscreteInputs(protocolType string, storeDataType string, slave 
 	for i := 0; i < times; i++ {
 
 		addr_mbap = addr + i*sendQuantity
-		addr_pdu = addr - 1 - 10000 + i*sendQuantity
+		if addr > 100000 {
+			addr_pdu = addr - 1 - 100000 + i*sendQuantity
+		} else {
+			addr_pdu = addr - 1 - 10000 + i*sendQuantity
+		}
+
 		if i == times-1 { //当小于拆分发送数量时，按实际数量发送
 			quantity_pdu = quantity - sendQuantity*i
 		} else {
