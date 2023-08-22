@@ -6,18 +6,18 @@ import (
 	"time"
 )
 
-func Write2(conn net.Conn, writeTimeout int, w []byte) (err error) {
+func Write2(conn net.Conn, writeTimeout int, w []byte) (n int, err error) {
 	err = conn.SetWriteDeadline(time.Now().Add(time.Duration(writeTimeout) * time.Millisecond))
 	if err != nil {
-		return err
+		return 0, err
 	}
-	_, err = conn.Write(w)
+	n, err = conn.Write(w)
 	if err != nil {
-		return err
+		return n, err
 	}
 	err = conn.SetWriteDeadline(time.Time{})
 	if err != nil {
-		return err
+		return 0, err
 	}
-	return err
+	return n, err
 }
