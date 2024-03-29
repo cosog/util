@@ -58,7 +58,7 @@ func OpenLogFile(path string, name string, writer string) *os.File {
 }
 func DetectionLogSize(file *os.File, size int64, path string, name string, writer string) {
 
-	Ticker := time.NewTicker(time.Duration(1) * time.Minute) //单位分钟		1
+	Ticker := time.NewTicker(time.Duration(1) * time.Second) //单位分钟		1
 	defer Ticker.Stop()
 
 	for {
