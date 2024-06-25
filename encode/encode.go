@@ -3,9 +3,11 @@ package util_encode
 
 import (
 	"encoding/binary"
+	// "log"
 	"math"
 	"reflect"
 	"runtime"
+	"strconv"
 	"strings"
 	"unsafe"
 
@@ -492,7 +494,15 @@ func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDa
 					a := []byte(info[0])
 
 					for i := 0; i < cnt; i = i + 2 {
-						value_b[i/2] = a[i]<<4 | a[i+1]
+						high, err := strconv.Atoi(string(a[i]))
+						if err != nil {
+							break
+						}
+						low, err := strconv.Atoi(string(a[i+1]))
+						if err != nil {
+							break
+						}
+						value_b[i/2] = byte(high)<<4 | byte(low)
 						runtime.Gosched()
 					}
 				}
@@ -766,13 +776,13 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					length = byte(2 * quantity_pdu)
 					value_b := make([]byte, 2*quantity_pdu)
 
-					for j := i * sendQuantity; j < i*sendQuantity+quantity_pdu; j++ {
+					for j := 0; j < quantity_pdu; j++ {
 						start = j * 2
 						end = (j + 1) * 2
 						if math.Abs(ratio) < util.CalculationError {
 							ratio = 1.0
 						}
-						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i*sendQuantity+j])/float32(ratio)))))
 						runtime.Gosched()
 					}
 
@@ -834,13 +844,13 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					length = byte(2 * quantity_pdu)
 					value_b := make([]byte, 2*quantity_pdu)
 
-					for j := i * sendQuantity; j < i*sendQuantity+quantity_pdu; j++ {
+					for j := 0; j < quantity_pdu; j++ {
 						start = j * 2
 						end = (j + 1) * 2
 						if math.Abs(ratio) < util.CalculationError {
 							ratio = 1.0
 						}
-						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i*sendQuantity+j])/float32(ratio)))))
 						runtime.Gosched()
 					}
 
@@ -892,13 +902,13 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					length = byte(2 * quantity_pdu)
 
 					value_b := make([]byte, 2*quantity_pdu)
-					for j := i * sendQuantity / 2; j < i*sendQuantity/2+quantity_pdu/2; j++ {
+					for j := 0; j < quantity_pdu/2; j++ {
 						start = j * 4
 						end = (j + 1) * 4
 						if math.Abs(ratio) < util.CalculationError {
 							ratio = 1.0
 						}
-						bits := math.Float32bits(float32(info[j]) / float32(ratio))
+						bits := math.Float32bits(float32(info[i*sendQuantity/2+j]) / float32(ratio))
 						binary.BigEndian.PutUint32(value_b[start:end], bits)
 						runtime.Gosched()
 					}
@@ -918,6 +928,7 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 			case "uint16":
 				fallthrough
 			case "int16":
+
 				quantity = len(info)
 				switch quantity {
 				case 0:
@@ -932,6 +943,7 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 				} else {
 					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
 				}
+
 				for i := 0; i < times; i++ {
 
 					addr_mbap = addr + i*sendQuantity
@@ -958,14 +970,17 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					length = byte(2 * quantity_pdu)
 					value_b := make([]byte, 2*quantity_pdu)
 
-					for j := i * sendQuantity; j < i*sendQuantity+quantity_pdu; j++ {
+					for j := 0; j < quantity_pdu; j++ {
+
 						start = j * 2
 						end = (j + 1) * 2
 						if math.Abs(ratio) < util.CalculationError {
 							ratio = 1.0
 						}
-						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+
+						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i*sendQuantity+j])/float32(ratio)))))
 						runtime.Gosched()
+
 					}
 
 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
@@ -973,6 +988,7 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					adu_res = append(adu_res, adu)
 
 				}
+
 			case "float32":
 
 				quantity = 2 * len(info)
@@ -1016,13 +1032,14 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					length = byte(2 * quantity_pdu)
 
 					value_b := make([]byte, 2*quantity_pdu)
-					for j := i * sendQuantity / 2; j < i*sendQuantity/2+quantity_pdu/2; j++ {
+					// for j := i * sendQuantity / 2; j < i*sendQuantity/2+quantity_pdu/2; j++ {
+					for j := 0; j < quantity_pdu/2; j++ {
 						start = j * 4
 						end = (j + 1) * 4
 						if math.Abs(ratio) < util.CalculationError {
 							ratio = 1.0
 						}
-						bits := math.Float32bits(float32(info[j]) / float32(ratio))
+						bits := math.Float32bits(float32(info[i*sendQuantity/2+j]) / float32(ratio))
 						binary.BigEndian.PutUint32(value_b[start:end], bits)
 						runtime.Gosched()
 					}
@@ -1070,16 +1087,68 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					a := []byte(info[0])
 
 					for i := 0; i < cnt; i = i + 2 {
-						value_b[i/2] = a[i]<<4 | a[i+1]
+						high, err := strconv.Atoi(string(a[i]))
+						if err != nil {
+							break
+						}
+						low, err := strconv.Atoi(string(a[i+1]))
+						if err != nil {
+							break
+						}
+						value_b[i/2] = byte(high)<<4 | byte(low)
 						runtime.Gosched()
 					}
 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
 					addr_res = append(addr_res, addr_mbap)
 					adu_res = append(adu_res, adu)
 				}
+
 			default:
 			}
 		}
+		// info, ok := element.([]string)
+		// if ok {
+		// 	switch storeDataType {
+		// 	case "bcd":
+		// 		cnt := len(info[0])
+		// 		if cnt%2 == 0 {
+		// 			if cnt%4 == 0 {
+		// 				quantity = len(info[0]) / 4
+		// 			} else {
+		// 				quantity = len(info[0])/4 + 1
+		// 			}
+		// 			addr_mbap = addr
+
+		// 			if addr > 400000 {
+		// 				addr_pdu = addr - 1 - 400000
+		// 			} else {
+		// 				addr_pdu = addr - 1 - 40000
+		// 			}
+
+		// 			addr_pdu_b := make([]byte, 2)
+		// 			addr_mbap_b := make([]byte, 2)
+		// 			quantity_b := make([]byte, 2)
+
+		// 			binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+		// 			binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+		// 			binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+
+		// 			length = byte(2 * quantity)
+		// 			code = 0x10
+		// 			value_b := make([]byte, 2*quantity)
+		// 			a := []byte(info[0])
+
+		// 			for i := 0; i < cnt; i = i + 2 {
+		// 				value_b[i/2] = a[i]<<4 | a[i+1]
+		// 				runtime.Gosched()
+		// 			}
+		// 			adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+		// 			addr_res = append(addr_res, addr_mbap)
+		// 			adu_res = append(adu_res, adu)
+		// 		}
+		// 	default:
+		// 	}
+		// }
 	}
 	return addr_res, adu_res
 }
