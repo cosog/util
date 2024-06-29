@@ -3,6 +3,8 @@ package util_fes
 
 import (
 	"math"
+
+	"github.com/cosog/util"
 )
 
 func FESInterpolationPoint(fes *FESStruct, targetCNT int) FESStruct {
@@ -47,9 +49,15 @@ func FESInterpolationPoint(fes *FESStruct, targetCNT int) FESStruct {
 				sMin = v
 			}
 		}
-		for _, v := range tempFES.S {
-			resFES.S = append(resFES.S, sMin+(v-sMin)/(sMax-sMin)*fes.Stroke)
+		if math.Abs(sMax-sMin) < util.CalculationError {
+			resFES.S = append(resFES.S, tempFES.S...)
+
+		} else {
+			for _, v := range tempFES.S {
+				resFES.S = append(resFES.S, sMin+(v-sMin)/(sMax-sMin)*fes.Stroke)
+			}
 		}
+
 		resFES.F = append(resFES.F, tempFES.F...)
 		resFES.Watt = append(resFES.Watt, tempFES.Watt...)
 		resFES.I = append(resFES.I, tempFES.I...)
