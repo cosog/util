@@ -3,7 +3,7 @@ package util_encode
 
 import (
 	"encoding/binary"
-	// "log"
+	"log"
 	"math"
 	"reflect"
 	"runtime"
@@ -1103,6 +1103,127 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					adu_res = append(adu_res, adu)
 				}
 
+			case "uint16":
+				cnt := len(info[0])
+				if cnt%4 == 0 {
+					if cnt%4 == 0 {
+						quantity = len(info[0]) / 4
+					} else {
+						quantity = len(info[0])/4 + 1
+					}
+					addr_mbap = addr
+
+					if addr > 400000 {
+						addr_pdu = addr - 1 - 400000
+					} else {
+						addr_pdu = addr - 1 - 40000
+					}
+
+					addr_pdu_b := make([]byte, 2)
+					addr_mbap_b := make([]byte, 2)
+					quantity_b := make([]byte, 2)
+
+					binary.BigEndian.PutUint16(addr_mbap_b, uint16(addr_mbap))
+					binary.BigEndian.PutUint16(addr_pdu_b, uint16(addr_pdu))
+					binary.BigEndian.PutUint16(quantity_b, uint16(quantity))
+
+					length = byte(2 * quantity)
+					code = 0x10
+					value_b := make([]byte, 2*quantity)
+					a := []byte(info[0])
+
+					for i := 0; i < cnt; i = i + 4 {
+						// high, err := strconv.Atoi(string(a[i]))
+						// if err != nil {
+						// 	break
+						// }
+						// low, err := strconv.Atoi(string(a[i+1]))
+						// if err != nil {
+						// 	break
+						// }
+						// value_b[i/2] = byte(high)<<4 | byte(low)
+						num, err := strconv.Atoi(string(a[i : i+4]))
+						if err != nil {
+							log.Printf("转换出错: %v\n", err)
+							num = 0
+							// value_b[i/2] = byte(num)
+							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(uint(num)))
+
+						} else {
+							log.Printf("转换结果: %d\n", num)
+							// value_b[i/2] = byte(num)
+							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(uint(num)))
+
+						}
+						runtime.Gosched()
+					}
+
+					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+					addr_res = append(addr_res, addr_mbap)
+					adu_res = append(adu_res, adu)
+
+				}
+
+			case "int16":
+				cnt := len(info[0])
+				if cnt%4 == 0 {
+					if cnt%4 == 0 {
+						quantity = len(info[0]) / 4
+					} else {
+						quantity = len(info[0])/4 + 1
+					}
+					addr_mbap = addr
+
+					if addr > 400000 {
+						addr_pdu = addr - 1 - 400000
+					} else {
+						addr_pdu = addr - 1 - 40000
+					}
+
+					addr_pdu_b := make([]byte, 2)
+					addr_mbap_b := make([]byte, 2)
+					quantity_b := make([]byte, 2)
+
+					binary.BigEndian.PutUint16(addr_mbap_b, uint16(addr_mbap))
+					binary.BigEndian.PutUint16(addr_pdu_b, uint16(addr_pdu))
+					binary.BigEndian.PutUint16(quantity_b, uint16(quantity))
+
+					length = byte(2 * quantity)
+					code = 0x10
+					value_b := make([]byte, 2*quantity)
+					a := []byte(info[0])
+
+					for i := 0; i < cnt; i = i + 4 {
+						// high, err := strconv.Atoi(string(a[i]))
+						// if err != nil {
+						// 	break
+						// }
+						// low, err := strconv.Atoi(string(a[i+1]))
+						// if err != nil {
+						// 	break
+						// }
+						// value_b[i/2] = byte(high)<<4 | byte(low)
+						num, err := strconv.Atoi(string(a[i : i+4]))
+						if err != nil {
+							log.Printf("转换出错: %v\n", err)
+							num = 0
+							// value_b[i/2] = byte(num)
+							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(int16(num)))
+
+						} else {
+							log.Printf("转换结果: %d\n", num)
+							// value_b[i/2] = byte(num)
+							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(int16(num)))
+
+						}
+						runtime.Gosched()
+					}
+
+					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+					addr_res = append(addr_res, addr_mbap)
+					adu_res = append(adu_res, adu)
+
+				}
 			default:
 			}
 		}

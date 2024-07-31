@@ -668,6 +668,27 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 					}
 					// util.FormatOutput(value)
 					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+2 <= len(b); i = i + 2 {
+						d := int(binary.LittleEndian.Uint16(b[i : i+2]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "000" + s
+						case 2:
+							s = "00" + s
+						case 3:
+							s = "0" + s
+
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
 				}
 
 			}
@@ -738,6 +759,27 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 					}
 					// util.FormatOutput(value)
 					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+2 <= len(b); i = i + 2 {
+						d := int(binary.BigEndian.Uint16(b[i : i+2]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "000" + s
+						case 2:
+							s = "00" + s
+						case 3:
+							s = "0" + s
+
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
 				}
 			}
 		}
@@ -784,6 +826,27 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 					}
 					// util.FormatOutput(value)
 					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+2 <= len(b); i = i + 2 {
+						d := int(binary.LittleEndian.Uint16(b[i : i+2]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "000" + s
+						case 2:
+							s = "00" + s
+						case 3:
+							s = "0" + s
+
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
 				}
 			}
 		case "big":
@@ -828,6 +891,27 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 						runtime.Gosched()
 					}
 					// util.FormatOutput(value)
+					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+2 <= len(b); i = i + 2 {
+						d := int(binary.BigEndian.Uint16(b[i : i+2]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "000" + s
+						case 2:
+							s = "00" + s
+						case 3:
+							s = "0" + s
+
+						}
+						str += s
+
+					}
+					value = append(value, str)
 					return value
 				}
 			}
