@@ -40,6 +40,9 @@ func FESInterpolationPoint(fes *FESStruct, targetCNT int) FESStruct {
 				}
 			}
 		}
+
+		tempFES.RawS = append(tempFES.RawS, tempFES.S...)
+
 		//拉伸
 		for _, v := range tempFES.S {
 			if sMax < v {
@@ -61,6 +64,7 @@ func FESInterpolationPoint(fes *FESStruct, targetCNT int) FESStruct {
 		resFES.F = append(resFES.F, tempFES.F...)
 		resFES.Watt = append(resFES.Watt, tempFES.Watt...)
 		resFES.I = append(resFES.I, tempFES.I...)
+		resFES.RawS = append(resFES.RawS, tempFES.RawS...)
 
 		resFES.CNT = targetCNT
 		resFES.AcqTime = fes.AcqTime

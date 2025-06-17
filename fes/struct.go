@@ -10,4 +10,5 @@ type FESStruct struct {
 	Watt    []float64 //
 	I       []float64 //
 	S       []float64 //
+	RawS    []float64 //
 }
