@@ -3,6 +3,8 @@ package util_decode
 
 import (
 	"encoding/binary"
+
+	"github.com/cosog/util/crc"
 )
 
 func Decode_Modbus_TCP(content string) (byte, int, interface{}, bool, bool, bool, bool) {
@@ -209,6 +211,7 @@ func Decode_Modbus_TCP(content string) (byte, int, interface{}, bool, bool, bool
 }
 func Decode_Modbus_RTU(addr int, content string) (byte, int, interface{}, bool, bool, bool, bool) {
 
+	var crc util_crc.Crc
 	var slave byte
 	var value interface{}
 	// var quantity int
@@ -251,6 +254,7 @@ func Decode_Modbus_RTU(addr int, content string) (byte, int, interface{}, bool, 
 					size = int(r[2])
 					if len(r) >= 3+size {
 						value = r[3 : 3+size]
+
 					} else {
 						crc_err = true
 					}
@@ -275,6 +279,18 @@ func Decode_Modbus_RTU(addr int, content string) (byte, int, interface{}, bool, 
 					size = int(r[2])
 					if len(r) >= 3+size {
 						value = r[3 : 3+size]
+						if len(r) == 3+size+2 {
+
+							crc.Reset()                 //
+							crc.PushBytes(r[:len(r)-2]) //
+							if crc.Low == r[len(r)-2] && crc.High == r[len(r)-1] {
+								crc_err = false
+							} else {
+								crc_err = true
+							}
+						} else {
+							crc_err = true
+						}
 					} else {
 						crc_err = true
 					}
