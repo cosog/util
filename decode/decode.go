@@ -3,6 +3,7 @@ package util_decode
 
 import (
 	"encoding/binary"
+	"log"
 
 	"github.com/cosog/util/crc"
 )
@@ -280,7 +281,7 @@ func Decode_Modbus_RTU(addr int, content string) (byte, int, interface{}, bool, 
 					if len(r) >= 3+size {
 						value = r[3 : 3+size]
 						if len(r) == 3+size+2 {
-
+							log.Println("test ---------------------")
 							crc.Reset()                 //
 							crc.PushBytes(r[:len(r)-2]) //
 							if crc.Low == r[len(r)-2] && crc.High == r[len(r)-1] {
