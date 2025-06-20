@@ -506,7 +506,6 @@ func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDa
 						runtime.Gosched()
 					}
 				}
-
 			default:
 			}
 		}
@@ -1102,6 +1101,42 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					addr_res = append(addr_res, addr_mbap)
 					adu_res = append(adu_res, adu)
 				}
+
+			case "byte":
+				cnt := len(info[0])
+
+				if cnt%2 == 0 {
+					quantity = len(info[0]) / 2
+				} else {
+					quantity = len(info[0])/2 + 1
+				}
+				addr_mbap = addr
+
+				if addr > 400000 {
+					addr_pdu = addr - 1 - 400000
+				} else {
+					addr_pdu = addr - 1 - 40000
+				}
+
+				addr_pdu_b := make([]byte, 2)
+				addr_mbap_b := make([]byte, 2)
+				quantity_b := make([]byte, 2)
+
+				binary.BigEndian.PutUint16(addr_mbap_b, uint16(addr_mbap))
+				binary.BigEndian.PutUint16(addr_pdu_b, uint16(addr_pdu))
+				binary.BigEndian.PutUint16(quantity_b, uint16(quantity))
+
+				length = byte(2 * quantity)
+				code = 0x10
+				value_b := make([]byte, 2*quantity)
+				a := []byte(info[0])
+
+				for k, v := range a {
+					value_b[k] = v
+				}
+				adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+				addr_res = append(addr_res, addr_mbap)
+				adu_res = append(adu_res, adu)
 
 			case "uint16":
 				cnt := len(info[0])

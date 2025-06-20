@@ -599,7 +599,16 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 				}
 				// util.FormatOutput(value)
 				return value
+
+			case "string":
+				s := string(b)
+				cleanData := strings.ReplaceAll(s, "\x00", "")
+				value := make([]string, 0)
+				value = append(value, cleanData)
+				return value
+
 			}
+
 		}
 	case "uint16":
 		switch strings.ToLower(storeMode) {

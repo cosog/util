@@ -77,6 +77,9 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 						}
 						b = append(b, temp...)
 					}
+				case "byte":
+					b := make([]byte, 0)
+					b = append(b, []byte(v)...)
 				}
 			}
 		}

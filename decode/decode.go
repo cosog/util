@@ -3,7 +3,6 @@ package util_decode
 
 import (
 	"encoding/binary"
-	"log"
 
 	"github.com/cosog/util/crc"
 )
@@ -276,34 +275,26 @@ func Decode_Modbus_RTU(addr int, content string) (byte, int, interface{}, bool, 
 				}
 
 			case 0x03: //读保持寄存器	响应pdu  功能码1字节+字节数1字节(2*N)+寄存器值(N*2字节)
-
 				if len(r) >= 3 {
-					log.Println("test00 ---------------------")
 					size = int(r[2])
 					if len(r) >= 3+size {
-						log.Println("test01 ---------------------")
+
 						value = r[3 : 3+size]
-						if len(r) == 3+size+2 {
-							log.Println("test02 ---------------------")
-							crc.Reset()                 //
-							crc.PushBytes(r[:len(r)-2]) //
-							if crc.Low == r[len(r)-2] && crc.High == r[len(r)-1] {
-								log.Println("test03 ---------------------")
+						if len(r) >= 3+size+2 {
+							crc.Reset()               //
+							crc.PushBytes(r[:3+size]) //
+							if crc.Low == r[3+size] && crc.High == r[3+size+1] {
 								crc_err = false
 							} else {
-								log.Println("test04 ---------------------")
 								crc_err = true
 							}
 						} else {
-							log.Println("test05 ---------------------")
 							crc_err = true
 						}
 					} else {
-						log.Println("test06 ---------------------")
 						crc_err = true
 					}
 				} else {
-					log.Println("test07 ---------------------")
 					crc_err = true
 				}
 			case 0x04: //读输入寄存器  响应pdu  功能码1字节+字节数1字节(2*N)+寄存器值(N*2字节)
