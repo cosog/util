@@ -926,6 +926,41 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 			}
 		}
 
+	case "int64":
+		switch strings.ToLower(storeMode) {
+		case "little":
+			if len(b) > 7 {
+				switch strings.ToLower(IFDataType) {
+				case "int64":
+					value := make([]int64, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						d := int64(binary.LittleEndian.Uint64(b[i : i+8]))
+						f := float64(d) * float64(ratio)
+						value = append(value, int64(f))
+						runtime.Gosched()
+					}
+					return value
+				}
+			}
+		case "big":
+			fallthrough
+		default:
+			if len(b) > 7 {
+
+				switch strings.ToLower(IFDataType) {
+				case "int64":
+					value := make([]int64, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						d := int64(binary.BigEndian.Uint64(b[i : i+8]))
+						f := float64(d) * float64(ratio)
+						value = append(value, int64(f))
+						runtime.Gosched()
+					}
+					return value
+				}
+			}
+		}
+
 	case "float32":
 		switch strings.ToLower(storeMode) {
 		case "little":
