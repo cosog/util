@@ -23,7 +23,7 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					var bcd_msb int
 					var bcd_lsb int
 					var valid bool = true
-					b := make([]byte, 0)
+					// b := make([]byte, 0)
 					temp := make([]byte, int(math.Ceil(float64(len(v))/2.0)))
 					for i := 0; i < len(v); i++ {
 						if !(v[i] == '0' || v[i] == '1' || v[i] == '2' || v[i] == '3' || v[i] == '4' || v[i] == '5' || v[i] == '6' || v[i] == '7' || v[i] == '8' || v[i] == '9') {
@@ -56,7 +56,7 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					var bcd_msb int
 					var bcd_lsb int
 					var valid bool = true
-					b := make([]byte, 0)
+					// b := make([]byte, 0)
 					temp := make([]byte, int(math.Ceil(float64(len(v))/2.0)))
 					for i := 0; i < len(v); i++ {
 						if !(v[i] == '0' || v[i] == '1' || v[i] == '2' || v[i] == '3' || v[i] == '4' || v[i] == '5' || v[i] == '6' || v[i] == '7' || v[i] == '8' || v[i] == '9') {
@@ -78,7 +78,7 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 						b = append(b, temp...)
 					}
 				case "byte":
-					b := make([]byte, 0)
+					// b := make([]byte, 0)
 					b = append(b, []byte(v)...)
 				}
 			}
