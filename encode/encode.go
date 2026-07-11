@@ -39,6 +39,8 @@ func Encode_ReadHoldingRegisters(protocolType string, storeDataType string, slav
 	case "uint16":
 	case "float32":
 		quantity = 2 * quantity
+	case "float64":
+		quantity = 4 * quantity
 	case "bcd":
 		quantity = int(math.Ceil(float64(quantity) / 4))
 	}
@@ -401,6 +403,23 @@ func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDa
 					binary.BigEndian.PutUint32(value_b[start:end], bits)
 					runtime.Gosched()
 				}
+			case "float64":
+				cnt := len(info)
+				quantity = 4 * len(info)
+				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+				length = byte(2 * quantity)
+				code = 0x10
+				value_b = make([]byte, 2*quantity)
+				for i := 0; i < cnt; i++ {
+					start = i * 8
+					end = (i + 1) * 8
+					if math.Abs(ratio) < util.CalculationError {
+						ratio = 1.0
+					}
+					bits := math.Float64bits(float64(float32(info[i]) / float32(ratio)))
+					binary.BigEndian.PutUint64(value_b[start:end], bits)
+					runtime.Gosched()
+				}
 
 			default:
 			}
@@ -472,6 +491,24 @@ func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDa
 					binary.BigEndian.PutUint32(value_b[start:end], bits)
 					runtime.Gosched()
 				}
+			case "float64":
+
+				cnt := len(info)
+				quantity = 4 * len(info)
+				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+				length = byte(2 * quantity)
+				code = 0x10
+				value_b = make([]byte, 2*quantity)
+				for i := 0; i < cnt; i++ {
+					start = i * 8
+					end = (i + 1) * 8
+					if math.Abs(ratio) < util.CalculationError {
+						ratio = 1.0
+					}
+					bits := math.Float64bits(info[i] / ratio)
+					binary.BigEndian.PutUint64(value_b[start:end], bits)
+					runtime.Gosched()
+				}
 			default:
 			}
 		}
@@ -506,6 +543,7 @@ func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDa
 						runtime.Gosched()
 					}
 				}
+
 			default:
 			}
 		}
@@ -915,7 +953,64 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
 					addr_res = append(addr_res, addr_mbap)
 					adu_res = append(adu_res, adu)
+				}
+			case "float64":
 
+				quantity = 4 * len(info)
+
+				switch quantity {
+				case 0:
+				case 1:
+					code = 0x06
+				default:
+					code = 0x10
+				}
+
+				if quantity%sendQuantity == 0 {
+					times = quantity / sendQuantity
+				} else {
+					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+				}
+				for i := 0; i < times; i++ {
+
+					addr_mbap = addr + i*sendQuantity
+
+					if addr > 400000 {
+						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+					} else {
+						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+					}
+					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+						quantity_pdu = quantity - sendQuantity*i
+					} else {
+						quantity_pdu = sendQuantity
+					}
+
+					addr_pdu_b := make([]byte, 2)
+					addr_mbap_b := make([]byte, 2)
+					quantity_b := make([]byte, 2)
+
+					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+					length = byte(2 * quantity_pdu)
+
+					value_b := make([]byte, 2*quantity_pdu)
+					for j := 0; j < quantity_pdu/4; j++ {
+						start = j * 8
+						end = (j + 1) * 8
+						if math.Abs(ratio) < util.CalculationError {
+							ratio = 1.0
+						}
+						bits := math.Float64bits(float64(info[i*sendQuantity/4+j] / float32(ratio)))
+						binary.BigEndian.PutUint64(value_b[start:end], bits)
+						runtime.Gosched()
+					}
+
+					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+					addr_res = append(addr_res, addr_mbap)
+					adu_res = append(adu_res, adu)
 				}
 			default:
 			}
@@ -1048,6 +1143,66 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					adu_res = append(adu_res, adu)
 
 				}
+			case "float64":
+
+				quantity = 4 * len(info)
+
+				switch quantity {
+				case 0:
+				case 1:
+					code = 0x06
+				default:
+					code = 0x10
+				}
+
+				if quantity%sendQuantity == 0 {
+					times = quantity / sendQuantity
+				} else {
+					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+				}
+				for i := 0; i < times; i++ {
+
+					addr_mbap = addr + i*sendQuantity
+
+					if addr > 400000 {
+						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+					} else {
+						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+					}
+					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+						quantity_pdu = quantity - sendQuantity*i
+					} else {
+						quantity_pdu = sendQuantity
+					}
+
+					addr_pdu_b := make([]byte, 2)
+					addr_mbap_b := make([]byte, 2)
+					quantity_b := make([]byte, 2)
+
+					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+					length = byte(2 * quantity_pdu)
+
+					value_b := make([]byte, 2*quantity_pdu)
+					// for j := i * sendQuantity / 2; j < i*sendQuantity/2+quantity_pdu/2; j++ {
+					for j := 0; j < quantity_pdu/4; j++ {
+						start = j * 8
+						end = (j + 1) * 8
+						if math.Abs(ratio) < util.CalculationError {
+							ratio = 1.0
+						}
+						bits := math.Float64bits(info[i*sendQuantity/4+j] / ratio)
+						binary.BigEndian.PutUint64(value_b[start:end], bits)
+						runtime.Gosched()
+					}
+
+					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+					addr_res = append(addr_res, addr_mbap)
+					adu_res = append(adu_res, adu)
+
+				}
 			default:
 			}
 
@@ -1137,7 +1292,6 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 				adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
 				addr_res = append(addr_res, addr_mbap)
 				adu_res = append(adu_res, adu)
-
 			case "uint16":
 				cnt := len(info[0])
 				if cnt%4 == 0 {
@@ -1198,7 +1352,6 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 					adu_res = append(adu_res, adu)
 
 				}
-
 			case "int16":
 				cnt := len(info[0])
 				if cnt%4 == 0 {
@@ -1308,6 +1461,1202 @@ func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifD
 	}
 	return addr_res, adu_res
 }
+
+// func Encode_WriteHoldingRegister(protocolType string, storeDataType string, ifDataType string, slave byte, addr int, ratio float64, value interface{}) string {
+
+// 	var crc util_crc.Crc
+// 	var start, end int
+// 	var mbap []byte
+// 	var code byte
+// 	var length byte
+// 	var quantity int
+// 	var addr_pdu int
+// 	var addr_mbap int
+
+// 	addr_mbap = addr
+// 	// addr_pdu = addr - 1 - 40000
+// 	if addr > 400000 {
+// 		addr_pdu = addr - 1 - 400000
+// 	} else {
+// 		addr_pdu = addr - 1 - 40000
+// 	}
+
+// 	addr_mbap_b := make([]byte, 2)
+// 	addr_pdu_b := make([]byte, 2)
+
+// 	binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 	binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+
+// 	quantity_b := make([]byte, 2)
+// 	value_b := make([]byte, 0)
+// 	var elements []interface{}
+// 	var element interface{}
+// 	var tempBool []bool
+// 	var tempInt []int
+// 	var tempFloat32 []float32
+// 	var tempFloat64 []float64
+// 	var tempString []string
+// 	var ok bool
+
+// 	switch reflect.TypeOf(value).String() {
+// 	case "[]interface {}":
+// 		elements, ok = value.([]interface{})
+// 		if ok {
+// 			for _, v := range elements {
+
+// 				switch strings.ToLower(ifDataType) { //bool int float32 float64 string
+// 				case "bool":
+// 					switch v.(type) {
+// 					case bool:
+// 						tempBool = append(tempBool, v.(bool))
+// 					}
+// 				case "int":
+// 					switch v.(type) {
+// 					case int:
+// 						tempInt = append(tempInt, v.(int))
+// 					case float32:
+// 						tempInt = append(tempInt, int(v.(float32)))
+// 					case float64:
+// 						tempInt = append(tempInt, int(v.(float64)))
+// 					}
+
+// 				case "float32":
+// 					switch v.(type) {
+// 					case int:
+// 						tempFloat32 = append(tempFloat32, float32(v.(int)))
+// 					case float32:
+// 						tempFloat32 = append(tempFloat32, v.(float32))
+// 					case float64:
+// 						tempFloat32 = append(tempFloat32, float32(v.(float64)))
+// 					}
+// 				case "float64":
+// 					switch v.(type) {
+// 					case int:
+// 						tempFloat64 = append(tempFloat64, float64(v.(int)))
+// 					case float32:
+// 						tempFloat64 = append(tempFloat64, float64(v.(float32)))
+// 					case float64:
+// 						tempFloat64 = append(tempFloat64, float64(v.(float64)))
+// 					}
+// 				case "string":
+// 					tempString = append(tempString, v.(string))
+// 				}
+// 				runtime.Gosched()
+// 			}
+// 			switch strings.ToLower(ifDataType) { //bool int float32 float64 string
+
+// 			case "bool":
+// 				element = tempBool
+// 			case "int":
+// 				element = tempInt
+// 			case "float32":
+// 				element = tempFloat32
+// 			case "float64":
+// 				element = tempFloat64
+// 			case "string":
+// 				element = tempString
+// 			}
+// 		}
+
+// 	default:
+// 		element = value
+// 	}
+// 	switch strings.ToLower(ifDataType) {
+
+// 	case "bool":
+// 		info, ok := element.([]bool)
+// 		if ok {
+// 			cnt := len(info)
+// 			quantity = int(math.Ceil(float64(len(info)) / 16))
+// 			binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 			length = byte(2 * quantity)
+
+// 			switch quantity {
+// 			case 0:
+// 			case 1:
+// 				code = 0x06
+// 			default:
+// 				code = 0x10
+// 			}
+
+// 			value_b = make([]byte, 2*quantity)
+
+// 			switch storeDataType {
+// 			case "bit":
+
+// 				for i := 0; i < cnt; i++ {
+
+// 					if info[i] == true {
+// 						switch i % 8 {
+// 						case 0:
+// 							value_b[i/8] |= 0b00000001
+// 						case 1:
+// 							value_b[i/8] |= 0b00000010
+// 						case 2:
+// 							value_b[i/8] |= 0b00000100
+// 						case 3:
+// 							value_b[i/8] |= 0b00001000
+// 						case 4:
+// 							value_b[i/8] |= 0b00010000
+// 						case 5:
+// 							value_b[i/8] |= 0b00100000
+// 						case 6:
+// 							value_b[i/8] |= 0b01000000
+// 						case 7:
+// 							value_b[i/8] |= 0b10000000
+// 						}
+// 					}
+// 					runtime.Gosched()
+// 				}
+
+// 				// case "uint16":
+
+// 				// 	for i := 0; i < cnt; i++ {
+// 				// 		start = i * 2
+// 				// 		end = (i + 1) * 2
+// 				// 		if math.Abs(ratio) < ad_global.CalculationError {
+// 				// 			ratio = 1.0
+// 				// 		}
+// 				// 		binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 				// 		runtime.Gosched()
+// 				// 	}
+// 				// case "int16":
+
+// 				// 	for i := 0; i < cnt; i++ {
+// 				// 		start = i * 2
+// 				// 		end = (i + 1) * 2
+// 				// 		if math.Abs(ratio) < ad_global.CalculationError {
+// 				// 			ratio = 1.0
+// 				// 		}
+// 				// 		binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 				// 		runtime.Gosched()
+// 				// 	}
+
+// 				// default:
+// 			}
+// 		}
+
+// 	case "int":
+// 		info, ok := element.([]int)
+// 		if ok {
+// 			cnt := len(info)
+// 			quantity = len(info)
+// 			binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 			length = byte(2 * quantity)
+// 			switch cnt {
+// 			case 0:
+// 			case 1:
+// 				code = 0x06
+// 			default:
+// 				code = 0x10
+// 			}
+
+// 			value_b = make([]byte, 2*quantity)
+
+// 			switch storeDataType {
+// 			case "uint16":
+
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 2
+// 					end = (i + 1) * 2
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 					runtime.Gosched()
+// 				}
+// 			case "int16":
+
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 2
+// 					end = (i + 1) * 2
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 					runtime.Gosched()
+// 				}
+
+// 			default:
+// 			}
+// 		}
+
+// 	case "float32":
+// 		info, ok := element.([]float32)
+// 		if ok {
+
+// 			switch storeDataType {
+// 			case "uint16":
+// 				cnt := len(info)
+// 				quantity = len(info)
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 				length = byte(2 * quantity)
+
+// 				switch cnt {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				value_b = make([]byte, 2*quantity)
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 2
+// 					end = (i + 1) * 2
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 					runtime.Gosched()
+// 				}
+// 			case "int16":
+// 				cnt := len(info)
+// 				quantity = len(info)
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 				length = byte(2 * quantity)
+// 				switch cnt {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+// 				value_b = make([]byte, 2*quantity)
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 2
+// 					end = (i + 1) * 2
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 					runtime.Gosched()
+// 				}
+// 			case "float32":
+// 				cnt := len(info)
+// 				quantity = 2 * len(info)
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 				length = byte(2 * quantity)
+// 				code = 0x10
+// 				value_b = make([]byte, 2*quantity)
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 4
+// 					end = (i + 1) * 4
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					bits := math.Float32bits(float32(info[i]) / float32(ratio))
+// 					binary.BigEndian.PutUint32(value_b[start:end], bits)
+// 					runtime.Gosched()
+// 				}
+
+// 			default:
+// 			}
+// 		}
+// 	case "float64":
+// 		info, ok := element.([]float64)
+// 		if ok {
+// 			switch storeDataType {
+// 			case "uint16":
+// 				cnt := len(info)
+// 				quantity = len(info)
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 				length = byte(2 * quantity)
+// 				switch cnt {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+// 				value_b = make([]byte, 2*quantity)
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 2
+// 					end = (i + 1) * 2
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 					runtime.Gosched()
+// 				}
+// 			case "int16":
+// 				cnt := len(info)
+// 				quantity = len(info)
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 				length = byte(2 * quantity)
+// 				switch cnt {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				value_b = make([]byte, 2*quantity)
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 2
+// 					end = (i + 1) * 2
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i])/float32(ratio)))))
+// 					runtime.Gosched()
+// 				}
+// 			case "float32":
+
+// 				cnt := len(info)
+// 				quantity = 2 * len(info)
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 				length = byte(2 * quantity)
+// 				code = 0x10
+// 				value_b = make([]byte, 2*quantity)
+// 				for i := 0; i < cnt; i++ {
+// 					start = i * 4
+// 					end = (i + 1) * 4
+// 					if math.Abs(ratio) < util.CalculationError {
+// 						ratio = 1.0
+// 					}
+// 					bits := math.Float32bits(float32(info[i]) / float32(ratio))
+// 					binary.BigEndian.PutUint32(value_b[start:end], bits)
+// 					runtime.Gosched()
+// 				}
+// 			default:
+// 			}
+// 		}
+// 	case "string":
+// 		info, ok := element.([]string)
+// 		if ok {
+// 			switch storeDataType {
+// 			case "bcd":
+// 				cnt := len(info[0])
+// 				if cnt%2 == 0 {
+// 					if cnt%4 == 0 {
+// 						quantity = len(info[0]) / 4
+// 					} else {
+// 						quantity = len(info[0])/4 + 1
+// 					}
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 					length = byte(2 * quantity)
+// 					code = 0x10
+// 					value_b = make([]byte, 2*quantity)
+// 					a := []byte(info[0])
+
+// 					for i := 0; i < cnt; i = i + 2 {
+// 						high, err := strconv.Atoi(string(a[i]))
+// 						if err != nil {
+// 							break
+// 						}
+// 						low, err := strconv.Atoi(string(a[i+1]))
+// 						if err != nil {
+// 							break
+// 						}
+// 						value_b[i/2] = byte(high)<<4 | byte(low)
+// 						runtime.Gosched()
+// 					}
+// 				}
+// 			default:
+// 			}
+// 		}
+
+// 	}
+
+// 	b := make([]byte, 0)
+// 	switch strings.ToLower(protocolType) {
+// 	case "modbus-rtu":
+
+// 		switch code {
+// 		case 0x06:
+// 			b = append(b, slave, code)
+// 			b = append(b, addr_pdu_b...)
+// 			b = append(b, value_b...)
+// 		case 0x10:
+// 			b = append(b, slave, code)
+// 			b = append(b, addr_pdu_b...)
+// 			b = append(b, quantity_b...)
+// 			b = append(b, length)
+// 			b = append(b, value_b...)
+// 		}
+
+// 		crc.Reset()
+// 		crc.PushBytes(b)
+// 		b = append(b, crc.Low, crc.High)
+// 	case "modbus-tcp":
+// 		fallthrough
+// 	default:
+
+// 		switch code {
+// 		case 0x06:
+// 			mbap = append(mbap, addr_mbap_b...) //事务标识符 2个字节
+// 			mbap = append(mbap, 0x00, 0x00)     //协议标识符 2个字节
+
+// 			size := byte(unsafe.Sizeof(slave)) + byte(unsafe.Sizeof(code)) + byte(len(addr_pdu_b)) + byte(len(value_b)) //
+// 			mbap = append(mbap, 0x00, size)                                                                             //数据帧长度 2个字节
+// 			mbap = append(mbap, slave)
+
+// 			b = append(b, mbap...)
+
+// 			b = append(b, code)
+// 			b = append(b, addr_pdu_b...)
+// 			b = append(b, value_b...)
+// 		case 0x10:
+// 			mbap = append(mbap, addr_mbap_b...) //事务标识符 2个字节
+// 			mbap = append(mbap, 0x00, 0x00)     //协议标识符 2个字节
+
+// 			size := byte(unsafe.Sizeof(slave)) + byte(unsafe.Sizeof(code)) + byte(len(addr_pdu_b)+len(quantity_b)) + byte(unsafe.Sizeof(length)) + byte(len(value_b)) //
+// 			mbap = append(mbap, 0x00, size)                                                                                                                           //数据帧长度 2个字节
+// 			mbap = append(mbap, slave)
+
+// 			b = append(b, mbap...)
+
+// 			b = append(b, code)
+// 			b = append(b, addr_pdu_b...)
+// 			b = append(b, quantity_b...)
+// 			b = append(b, length)
+// 			b = append(b, value_b...)
+// 		}
+
+// 	}
+
+// 	return string(b)
+
+// }
+// func Encode_WriteHoldingRegister2(protocolType string, storeDataType string, ifDataType string, slave byte, addr int, ratio float64, value interface{}) ([]int, []string) {
+
+// 	var times int
+// 	var quantity_pdu int
+// 	var start, end int
+// 	var code byte
+// 	var length byte
+// 	var quantity int
+// 	var addr_pdu int
+// 	var addr_mbap int
+// 	var addr_res []int
+// 	var adu_res []string
+// 	sendQuantity := 100
+
+// 	var elements []interface{}
+// 	var element interface{}
+// 	var tempBool []bool
+// 	var tempInt []int
+// 	var tempFloat32 []float32
+// 	var tempFloat64 []float64
+// 	var tempString []string
+// 	var ok bool
+
+// 	switch reflect.TypeOf(value).String() {
+// 	case "[]interface {}":
+// 		elements, ok = value.([]interface{})
+// 		if ok {
+// 			for _, v := range elements {
+
+// 				switch strings.ToLower(ifDataType) { //bool int float32 float64 string
+// 				case "bool":
+// 					switch v.(type) {
+// 					case bool:
+// 						tempBool = append(tempBool, v.(bool))
+// 					}
+// 				case "int":
+// 					switch v.(type) {
+// 					case int:
+// 						tempInt = append(tempInt, v.(int))
+// 					case float32:
+// 						tempInt = append(tempInt, int(v.(float32)))
+// 					case float64:
+// 						tempInt = append(tempInt, int(v.(float64)))
+// 					}
+
+// 				case "float32":
+// 					switch v.(type) {
+// 					case int:
+// 						tempFloat32 = append(tempFloat32, float32(v.(int)))
+// 					case float32:
+// 						tempFloat32 = append(tempFloat32, v.(float32))
+// 					case float64:
+// 						tempFloat32 = append(tempFloat32, float32(v.(float64)))
+// 					}
+// 				case "float64":
+// 					switch v.(type) {
+// 					case int:
+// 						tempFloat64 = append(tempFloat64, float64(v.(int)))
+// 					case float32:
+// 						tempFloat64 = append(tempFloat64, float64(v.(float32)))
+// 					case float64:
+// 						tempFloat64 = append(tempFloat64, float64(v.(float64)))
+// 					}
+// 				case "string":
+// 					tempString = append(tempString, v.(string))
+// 				}
+// 				runtime.Gosched()
+// 			}
+// 			switch strings.ToLower(ifDataType) { //bool int float32 float64 string
+
+// 			case "bool":
+// 				element = tempBool
+// 			case "int":
+// 				element = tempInt
+// 			case "float32":
+// 				element = tempFloat32
+// 			case "float64":
+// 				element = tempFloat64
+// 			case "string":
+// 				element = tempString
+// 			}
+// 		}
+
+// 	default:
+// 		element = value
+// 	}
+// 	switch strings.ToLower(ifDataType) {
+
+// 	case "bool":
+// 		info, ok := element.([]bool)
+// 		if ok {
+// 			cnt := len(info)
+// 			quantity = int(math.Ceil(float64(len(info)) / 16))
+
+// 			length = byte(2 * quantity)
+
+// 			switch quantity {
+// 			case 0:
+// 			case 1:
+// 				code = 0x06
+// 			default:
+// 				code = 0x10
+// 			}
+
+// 			addr_mbap = addr
+
+// 			if addr > 400000 {
+// 				addr_pdu = addr - 1 - 400000
+// 			} else {
+// 				addr_pdu = addr - 1 - 40000
+// 			}
+
+// 			addr_pdu_b := make([]byte, 2)
+// 			addr_mbap_b := make([]byte, 2)
+// 			quantity_b := make([]byte, 2)
+
+// 			binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 			binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 			binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+// 			value_b := make([]byte, 2*quantity)
+
+// 			switch storeDataType {
+// 			case "bit":
+
+// 				for i := 0; i < cnt; i++ {
+
+// 					if info[i] == true {
+// 						switch i % 8 {
+// 						case 0:
+// 							value_b[i/8] |= 0b00000001
+// 						case 1:
+// 							value_b[i/8] |= 0b00000010
+// 						case 2:
+// 							value_b[i/8] |= 0b00000100
+// 						case 3:
+// 							value_b[i/8] |= 0b00001000
+// 						case 4:
+// 							value_b[i/8] |= 0b00010000
+// 						case 5:
+// 							value_b[i/8] |= 0b00100000
+// 						case 6:
+// 							value_b[i/8] |= 0b01000000
+// 						case 7:
+// 							value_b[i/8] |= 0b10000000
+// 						}
+// 					}
+// 					runtime.Gosched()
+// 				}
+// 			}
+
+// 			adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 			addr_res = append(addr_res, addr_mbap)
+// 			adu_res = append(adu_res, adu)
+
+// 		}
+// 	case "int":
+// 		info, ok := element.([]int)
+// 		if ok {
+// 			switch storeDataType {
+// 			case "uint16":
+// 				fallthrough
+// 			case "int16":
+
+// 				quantity = len(info)
+// 				switch quantity {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				if quantity%sendQuantity == 0 {
+// 					times = quantity / sendQuantity
+// 				} else {
+// 					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+// 				}
+// 				for i := 0; i < times; i++ {
+
+// 					addr_mbap = addr + i*sendQuantity
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+// 					}
+// 					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+// 						quantity_pdu = quantity - sendQuantity*i
+// 					} else {
+// 						quantity_pdu = sendQuantity
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+// 					length = byte(2 * quantity_pdu)
+// 					value_b := make([]byte, 2*quantity_pdu)
+
+// 					for j := 0; j < quantity_pdu; j++ {
+// 						start = j * 2
+// 						end = (j + 1) * 2
+// 						if math.Abs(ratio) < util.CalculationError {
+// 							ratio = 1.0
+// 						}
+// 						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i*sendQuantity+j])/float32(ratio)))))
+// 						runtime.Gosched()
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+
+// 			default:
+// 			}
+// 		}
+
+// 	case "float32":
+// 		info, ok := element.([]float32)
+// 		if ok {
+
+// 			switch storeDataType {
+// 			case "uint16":
+// 				fallthrough
+// 			case "int16":
+// 				quantity = len(info)
+// 				switch quantity {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				if quantity%sendQuantity == 0 {
+// 					times = quantity / sendQuantity
+// 				} else {
+// 					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+// 				}
+// 				for i := 0; i < times; i++ {
+
+// 					addr_mbap = addr + i*sendQuantity
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+// 					}
+// 					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+// 						quantity_pdu = quantity - sendQuantity*i
+// 					} else {
+// 						quantity_pdu = sendQuantity
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+// 					length = byte(2 * quantity_pdu)
+// 					value_b := make([]byte, 2*quantity_pdu)
+
+// 					for j := 0; j < quantity_pdu; j++ {
+// 						start = j * 2
+// 						end = (j + 1) * 2
+// 						if math.Abs(ratio) < util.CalculationError {
+// 							ratio = 1.0
+// 						}
+// 						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i*sendQuantity+j])/float32(ratio)))))
+// 						runtime.Gosched()
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+// 			case "float32":
+
+// 				quantity = 2 * len(info)
+
+// 				switch quantity {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				if quantity%sendQuantity == 0 {
+// 					times = quantity / sendQuantity
+// 				} else {
+// 					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+// 				}
+// 				for i := 0; i < times; i++ {
+
+// 					addr_mbap = addr + i*sendQuantity
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+// 					}
+// 					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+// 						quantity_pdu = quantity - sendQuantity*i
+// 					} else {
+// 						quantity_pdu = sendQuantity
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+// 					length = byte(2 * quantity_pdu)
+
+// 					value_b := make([]byte, 2*quantity_pdu)
+// 					for j := 0; j < quantity_pdu/2; j++ {
+// 						start = j * 4
+// 						end = (j + 1) * 4
+// 						if math.Abs(ratio) < util.CalculationError {
+// 							ratio = 1.0
+// 						}
+// 						bits := math.Float32bits(float32(info[i*sendQuantity/2+j]) / float32(ratio))
+// 						binary.BigEndian.PutUint32(value_b[start:end], bits)
+// 						runtime.Gosched()
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+// 			default:
+// 			}
+// 		}
+// 	case "float64":
+// 		info, ok := element.([]float64)
+// 		if ok {
+// 			switch storeDataType {
+// 			case "uint16":
+// 				fallthrough
+// 			case "int16":
+
+// 				quantity = len(info)
+// 				switch quantity {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				if quantity%sendQuantity == 0 {
+// 					times = quantity / sendQuantity
+// 				} else {
+// 					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+// 				}
+
+// 				for i := 0; i < times; i++ {
+
+// 					addr_mbap = addr + i*sendQuantity
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+// 					}
+// 					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+// 						quantity_pdu = quantity - sendQuantity*i
+// 					} else {
+// 						quantity_pdu = sendQuantity
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+// 					length = byte(2 * quantity_pdu)
+// 					value_b := make([]byte, 2*quantity_pdu)
+
+// 					for j := 0; j < quantity_pdu; j++ {
+
+// 						start = j * 2
+// 						end = (j + 1) * 2
+// 						if math.Abs(ratio) < util.CalculationError {
+// 							ratio = 1.0
+// 						}
+
+// 						binary.BigEndian.PutUint16(value_b[start:end], uint16(int16(int(float32(info[i*sendQuantity+j])/float32(ratio)))))
+// 						runtime.Gosched()
+
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+
+// 			case "float32":
+
+// 				quantity = 2 * len(info)
+
+// 				switch quantity {
+// 				case 0:
+// 				case 1:
+// 					code = 0x06
+// 				default:
+// 					code = 0x10
+// 				}
+
+// 				if quantity%sendQuantity == 0 {
+// 					times = quantity / sendQuantity
+// 				} else {
+// 					times = quantity/sendQuantity + 1 //当小于拆分发送寄存器长度时，按实际长度发送
+// 				}
+// 				for i := 0; i < times; i++ {
+
+// 					addr_mbap = addr + i*sendQuantity
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000 + i*sendQuantity
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000 + i*sendQuantity
+// 					}
+// 					if i == times-1 { //当小于拆分发送寄存器长度时，按实际长度发送
+// 						quantity_pdu = quantity - sendQuantity*i
+// 					} else {
+// 						quantity_pdu = sendQuantity
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity_pdu)))
+
+// 					length = byte(2 * quantity_pdu)
+
+// 					value_b := make([]byte, 2*quantity_pdu)
+// 					// for j := i * sendQuantity / 2; j < i*sendQuantity/2+quantity_pdu/2; j++ {
+// 					for j := 0; j < quantity_pdu/2; j++ {
+// 						start = j * 4
+// 						end = (j + 1) * 4
+// 						if math.Abs(ratio) < util.CalculationError {
+// 							ratio = 1.0
+// 						}
+// 						bits := math.Float32bits(float32(info[i*sendQuantity/2+j]) / float32(ratio))
+// 						binary.BigEndian.PutUint32(value_b[start:end], bits)
+// 						runtime.Gosched()
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+// 			default:
+// 			}
+
+// 		}
+// 	case "string":
+// 		info, ok := element.([]string)
+// 		if ok {
+// 			switch storeDataType {
+// 			case "bcd":
+// 				cnt := len(info[0])
+// 				if cnt%2 == 0 {
+// 					if cnt%4 == 0 {
+// 						quantity = len(info[0]) / 4
+// 					} else {
+// 						quantity = len(info[0])/4 + 1
+// 					}
+// 					addr_mbap = addr
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+
+// 					length = byte(2 * quantity)
+// 					code = 0x10
+// 					value_b := make([]byte, 2*quantity)
+// 					a := []byte(info[0])
+
+// 					for i := 0; i < cnt; i = i + 2 {
+// 						high, err := strconv.Atoi(string(a[i]))
+// 						if err != nil {
+// 							break
+// 						}
+// 						low, err := strconv.Atoi(string(a[i+1]))
+// 						if err != nil {
+// 							break
+// 						}
+// 						value_b[i/2] = byte(high)<<4 | byte(low)
+// 						runtime.Gosched()
+// 					}
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+// 				}
+
+// 			case "byte":
+// 				cnt := len(info[0])
+
+// 				if cnt%2 == 0 {
+// 					quantity = len(info[0]) / 2
+// 				} else {
+// 					quantity = len(info[0])/2 + 1
+// 				}
+// 				addr_mbap = addr
+
+// 				if addr > 400000 {
+// 					addr_pdu = addr - 1 - 400000
+// 				} else {
+// 					addr_pdu = addr - 1 - 40000
+// 				}
+
+// 				addr_pdu_b := make([]byte, 2)
+// 				addr_mbap_b := make([]byte, 2)
+// 				quantity_b := make([]byte, 2)
+
+// 				binary.BigEndian.PutUint16(addr_mbap_b, uint16(addr_mbap))
+// 				binary.BigEndian.PutUint16(addr_pdu_b, uint16(addr_pdu))
+// 				binary.BigEndian.PutUint16(quantity_b, uint16(quantity))
+
+// 				length = byte(2 * quantity)
+// 				code = 0x10
+// 				value_b := make([]byte, 2*quantity)
+// 				a := []byte(info[0])
+
+// 				for k, v := range a {
+// 					value_b[k] = v
+// 				}
+// 				adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 				addr_res = append(addr_res, addr_mbap)
+// 				adu_res = append(adu_res, adu)
+
+// 			case "uint16":
+// 				cnt := len(info[0])
+// 				if cnt%4 == 0 {
+// 					if cnt%4 == 0 {
+// 						quantity = len(info[0]) / 4
+// 					} else {
+// 						quantity = len(info[0])/4 + 1
+// 					}
+// 					addr_mbap = addr
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(addr_mbap))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(addr_pdu))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(quantity))
+
+// 					length = byte(2 * quantity)
+// 					code = 0x10
+// 					value_b := make([]byte, 2*quantity)
+// 					a := []byte(info[0])
+
+// 					for i := 0; i < cnt; i = i + 4 {
+// 						// high, err := strconv.Atoi(string(a[i]))
+// 						// if err != nil {
+// 						// 	break
+// 						// }
+// 						// low, err := strconv.Atoi(string(a[i+1]))
+// 						// if err != nil {
+// 						// 	break
+// 						// }
+// 						// value_b[i/2] = byte(high)<<4 | byte(low)
+// 						num, err := strconv.Atoi(string(a[i : i+4]))
+// 						if err != nil {
+// 							log.Printf("转换出错: %v\n", err)
+// 							num = 0
+// 							// value_b[i/2] = byte(num)
+// 							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(uint(num)))
+
+// 						} else {
+// 							log.Printf("转换结果: %d\n", num)
+// 							// value_b[i/2] = byte(num)
+// 							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(uint(num)))
+
+// 						}
+// 						runtime.Gosched()
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+
+// 			case "int16":
+// 				cnt := len(info[0])
+// 				if cnt%4 == 0 {
+// 					if cnt%4 == 0 {
+// 						quantity = len(info[0]) / 4
+// 					} else {
+// 						quantity = len(info[0])/4 + 1
+// 					}
+// 					addr_mbap = addr
+
+// 					if addr > 400000 {
+// 						addr_pdu = addr - 1 - 400000
+// 					} else {
+// 						addr_pdu = addr - 1 - 40000
+// 					}
+
+// 					addr_pdu_b := make([]byte, 2)
+// 					addr_mbap_b := make([]byte, 2)
+// 					quantity_b := make([]byte, 2)
+
+// 					binary.BigEndian.PutUint16(addr_mbap_b, uint16(addr_mbap))
+// 					binary.BigEndian.PutUint16(addr_pdu_b, uint16(addr_pdu))
+// 					binary.BigEndian.PutUint16(quantity_b, uint16(quantity))
+
+// 					length = byte(2 * quantity)
+// 					code = 0x10
+// 					value_b := make([]byte, 2*quantity)
+// 					a := []byte(info[0])
+
+// 					for i := 0; i < cnt; i = i + 4 {
+// 						// high, err := strconv.Atoi(string(a[i]))
+// 						// if err != nil {
+// 						// 	break
+// 						// }
+// 						// low, err := strconv.Atoi(string(a[i+1]))
+// 						// if err != nil {
+// 						// 	break
+// 						// }
+// 						// value_b[i/2] = byte(high)<<4 | byte(low)
+// 						num, err := strconv.Atoi(string(a[i : i+4]))
+// 						if err != nil {
+// 							log.Printf("转换出错: %v\n", err)
+// 							num = 0
+// 							// value_b[i/2] = byte(num)
+// 							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(int16(num)))
+
+// 						} else {
+// 							log.Printf("转换结果: %d\n", num)
+// 							// value_b[i/2] = byte(num)
+// 							binary.BigEndian.PutUint16(value_b[i/2:i/2+2], uint16(int16(num)))
+
+// 						}
+// 						runtime.Gosched()
+// 					}
+
+// 					adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 					addr_res = append(addr_res, addr_mbap)
+// 					adu_res = append(adu_res, adu)
+
+// 				}
+// 			default:
+// 			}
+// 		}
+// 		// info, ok := element.([]string)
+// 		// if ok {
+// 		// 	switch storeDataType {
+// 		// 	case "bcd":
+// 		// 		cnt := len(info[0])
+// 		// 		if cnt%2 == 0 {
+// 		// 			if cnt%4 == 0 {
+// 		// 				quantity = len(info[0]) / 4
+// 		// 			} else {
+// 		// 				quantity = len(info[0])/4 + 1
+// 		// 			}
+// 		// 			addr_mbap = addr
+
+// 		// 			if addr > 400000 {
+// 		// 				addr_pdu = addr - 1 - 400000
+// 		// 			} else {
+// 		// 				addr_pdu = addr - 1 - 40000
+// 		// 			}
+
+// 		// 			addr_pdu_b := make([]byte, 2)
+// 		// 			addr_mbap_b := make([]byte, 2)
+// 		// 			quantity_b := make([]byte, 2)
+
+// 		// 			binary.BigEndian.PutUint16(addr_mbap_b, uint16(int16(addr_mbap)))
+// 		// 			binary.BigEndian.PutUint16(addr_pdu_b, uint16(int16(addr_pdu)))
+// 		// 			binary.BigEndian.PutUint16(quantity_b, uint16(int16(quantity)))
+
+// 		// 			length = byte(2 * quantity)
+// 		// 			code = 0x10
+// 		// 			value_b := make([]byte, 2*quantity)
+// 		// 			a := []byte(info[0])
+
+// 		// 			for i := 0; i < cnt; i = i + 2 {
+// 		// 				value_b[i/2] = a[i]<<4 | a[i+1]
+// 		// 				runtime.Gosched()
+// 		// 			}
+// 		// 			adu := Encode_WriteHoldingRegisterADU(protocolType, addr_mbap_b, addr_pdu_b, slave, code, quantity_b, length, value_b)
+// 		// 			addr_res = append(addr_res, addr_mbap)
+// 		// 			adu_res = append(adu_res, adu)
+// 		// 		}
+// 		// 	default:
+// 		// 	}
+// 		// }
+// 	}
+// 	return addr_res, adu_res
+// }
+
 func Encode_ReadCoils(protocolType string, storeDataType string, slave byte, addr int, quantity int) ([]int, []string) {
 
 	var crc util_crc.Crc
@@ -1597,6 +2946,8 @@ func Encode_ReadInputRegisters(protocolType string, storeDataType string, slave 
 	case "uint16":
 	case "float32":
 		quantity = 2 * quantity
+	case "float64":
+		quantity = 4 * quantity
 	case "bcd":
 		quantity = int(math.Ceil(float64(quantity) / 4))
 	}

@@ -99,6 +99,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					b = make([]byte, 4)
 					bits := math.Float32bits(float32(v / ratio))
 					binary.LittleEndian.PutUint32(b, bits)
+				case "float64":
+					b = make([]byte, 8)
+					bits := math.Float64bits(float64(v / ratio))
+					binary.LittleEndian.PutUint64(b, bits)
 				}
 			case "big":
 				fallthrough
@@ -114,6 +118,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					b = make([]byte, 4)
 					bits := math.Float32bits(float32(v / ratio))
 					binary.BigEndian.PutUint32(b, bits)
+				case "float64":
+					b = make([]byte, 8)
+					bits := math.Float64bits(float64(v / ratio))
+					binary.BigEndian.PutUint64(b, bits)
 				}
 			}
 		}
@@ -133,6 +141,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					b = make([]byte, 4)
 					bits := math.Float32bits(v / float32(ratio))
 					binary.LittleEndian.PutUint32(b, bits)
+				case "float64":
+					b = make([]byte, 8)
+					bits := math.Float64bits(float64(v) / ratio)
+					binary.LittleEndian.PutUint64(b, bits)
 				}
 			case "big":
 				fallthrough
@@ -148,6 +160,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					b = make([]byte, 4)
 					bits := math.Float32bits(v / float32(ratio))
 					binary.BigEndian.PutUint32(b, bits)
+				case "float64":
+					b = make([]byte, 8)
+					bits := math.Float64bits(float64(v) / ratio)
+					binary.BigEndian.PutUint64(b, bits)
 				}
 			}
 
@@ -284,6 +300,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 						s = make([]byte, 4)
 						bits := math.Float32bits(float32(v) / float32(ratio))
 						binary.LittleEndian.PutUint32(s, bits)
+					case "float64":
+						s = make([]byte, 8)
+						bits := math.Float64bits(v / ratio)
+						binary.LittleEndian.PutUint64(s, bits)
 					}
 				case "big":
 					fallthrough
@@ -299,6 +319,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 						s = make([]byte, 4)
 						bits := math.Float32bits(float32(v) / float32(ratio))
 						binary.BigEndian.PutUint32(s, bits)
+					case "float64":
+						s = make([]byte, 8)
+						bits := math.Float64bits(v / ratio)
+						binary.BigEndian.PutUint64(s, bits)
 					}
 				}
 				b = append(b, s...)
@@ -322,6 +346,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 						s = make([]byte, 4)
 						bits := math.Float32bits(v / float32(ratio))
 						binary.LittleEndian.PutUint32(s, bits)
+					case "float64":
+						s = make([]byte, 8)
+						bits := math.Float64bits(float64(v) / ratio)
+						binary.LittleEndian.PutUint64(s, bits)
 					}
 				case "big":
 					fallthrough
@@ -337,6 +365,10 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 						s = make([]byte, 4)
 						bits := math.Float32bits(v / float32(ratio))
 						binary.BigEndian.PutUint32(s, bits)
+					case "float64":
+						s = make([]byte, 8)
+						bits := math.Float64bits(float64(v) / ratio)
+						binary.BigEndian.PutUint64(s, bits)
 					}
 				}
 				b = append(b, s...)

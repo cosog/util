@@ -1054,6 +1054,99 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 			}
 		}
 
+	case "float64":
+		switch strings.ToLower(storeMode) {
+		case "little":
+			if len(b) > 7 {
+
+				switch strings.ToLower(IFDataType) {
+				case "int":
+					value := make([]int, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						f := math.Float64frombits(binary.LittleEndian.Uint64(b[i : i+8]))
+						d := f * float64(ratio)
+						value = append(value, int(d))
+						runtime.Gosched()
+					}
+					return value
+				case "float32":
+					value := make([]float32, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						f := math.Float64frombits(binary.LittleEndian.Uint64(b[i : i+8]))
+						f32 := float32(float64(f) * float64(ratio))
+
+						a := strconv.FormatFloat(float64(f32), 'f', prec, 32)
+						ff, _ := strconv.ParseFloat(a, 32)
+
+						value = append(value, float32(ff))
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "float64":
+					value := make([]float64, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						f := math.Float64frombits(binary.LittleEndian.Uint64(b[i : i+8]))
+						f64 := float64(f) * float64(ratio)
+
+						a := strconv.FormatFloat(f64, 'f', prec, 64)
+						ff, _ := strconv.ParseFloat(a, 64)
+
+						value = append(value, ff)
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				}
+
+			}
+		case "big":
+			fallthrough
+		default:
+			if len(b) > 7 {
+
+				switch strings.ToLower(IFDataType) {
+				case "int":
+					value := make([]int, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						f := math.Float64frombits(binary.BigEndian.Uint64(b[i : i+8]))
+						d := f * float64(ratio)
+						value = append(value, int(d))
+					}
+					return value
+				case "float32":
+					value := make([]float32, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						f := math.Float64frombits(binary.BigEndian.Uint64(b[i : i+8]))
+						f32 := float32(float64(f) * float64(ratio))
+
+						a := strconv.FormatFloat(float64(f32), 'f', prec, 32)
+						ff, _ := strconv.ParseFloat(a, 32)
+
+						value = append(value, float32(ff))
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "float64":
+					value := make([]float64, 0)
+					for i := 0; i+8 <= len(b); i = i + 8 {
+						f := math.Float64frombits(binary.BigEndian.Uint64(b[i : i+8]))
+						f64 := float64(f) * float64(ratio)
+
+						a := strconv.FormatFloat(f64, 'f', prec, 64)
+						ff, _ := strconv.ParseFloat(a, 64)
+
+						value = append(value, ff)
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				}
+
+			}
+		}
+
 	case "bcd":
 		switch strings.ToLower(storeMode) {
 		case "little":
