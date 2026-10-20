@@ -37,6 +37,10 @@ func Encode_ReadHoldingRegisters(protocolType string, storeDataType string, slav
 		quantity = int(math.Ceil(float64(quantity) / 2))
 	case "int16":
 	case "uint16":
+	case "int32":
+		quantity = 2 * quantity
+	case "uint32":
+		quantity = 2 * quantity
 	case "float32":
 		quantity = 2 * quantity
 	case "float64":
@@ -2944,6 +2948,10 @@ func Encode_ReadInputRegisters(protocolType string, storeDataType string, slave 
 		quantity = int(math.Ceil(float64(quantity) / 2))
 	case "int16":
 	case "uint16":
+	case "int32":
+		quantity = 2 * quantity
+	case "uint32":
+		quantity = 2 * quantity
 	case "float32":
 		quantity = 2 * quantity
 	case "float64":

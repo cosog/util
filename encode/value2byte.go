@@ -95,6 +95,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 				case "int16":
 					b = make([]byte, 2)
 					binary.LittleEndian.PutUint16(b, uint16(int16(int64(v/float64(ratio)))))
+				case "uint32":
+					b = make([]byte, 4)
+					binary.LittleEndian.PutUint32(b, uint32(uint64(v/float64(ratio))))
+				case "int32":
+					b = make([]byte, 4)
+					binary.LittleEndian.PutUint32(b, uint32(int32(int64(v/float64(ratio)))))
 				case "float32":
 					b = make([]byte, 4)
 					bits := math.Float32bits(float32(v / ratio))
@@ -114,6 +120,13 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 				case "int16":
 					b = make([]byte, 2)
 					binary.BigEndian.PutUint16(b, uint16(int16(int64(v/float64(ratio)))))
+				case "uint32":
+					b = make([]byte, 4)
+					binary.BigEndian.PutUint32(b, uint32(uint64(v/float64(ratio))))
+				case "int32":
+					b = make([]byte, 4)
+					binary.BigEndian.PutUint32(b, uint32(int32(int64(v/float64(ratio)))))
+
 				case "float32":
 					b = make([]byte, 4)
 					bits := math.Float32bits(float32(v / ratio))
@@ -137,6 +150,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 				case "int16":
 					b = make([]byte, 2)
 					binary.LittleEndian.PutUint16(b, uint16(int16(int32(v/float32(ratio)))))
+				case "uint32":
+					b = make([]byte, 4)
+					binary.LittleEndian.PutUint32(b, uint32(uint32(v/float32(ratio))))
+				case "int32":
+					b = make([]byte, 4)
+					binary.LittleEndian.PutUint32(b, uint32(int32(int32(v/float32(ratio)))))
 				case "float32":
 					b = make([]byte, 4)
 					bits := math.Float32bits(v / float32(ratio))
@@ -156,6 +175,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 				case "int16":
 					b = make([]byte, 2)
 					binary.BigEndian.PutUint16(b, uint16(int16(int32(v/float32(ratio)))))
+				case "uint32":
+					b = make([]byte, 4)
+					binary.BigEndian.PutUint32(b, uint32(uint32(v/float32(ratio))))
+				case "int32":
+					b = make([]byte, 4)
+					binary.BigEndian.PutUint32(b, uint32(int32(int32(v/float32(ratio)))))
 				case "float32":
 					b = make([]byte, 4)
 					bits := math.Float32bits(v / float32(ratio))
@@ -296,6 +321,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					case "int16":
 						s = make([]byte, 2)
 						binary.LittleEndian.PutUint16(s, uint16(int16(int64(v/float64(ratio)))))
+					case "uint32":
+						b = make([]byte, 4)
+						binary.LittleEndian.PutUint32(b, uint32(uint64(v/float64(ratio))))
+					case "int32":
+						b = make([]byte, 4)
+						binary.LittleEndian.PutUint32(b, uint32(int32(int64(v/float64(ratio)))))
 					case "float32":
 						s = make([]byte, 4)
 						bits := math.Float32bits(float32(v) / float32(ratio))
@@ -315,6 +346,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					case "int16":
 						s = make([]byte, 2)
 						binary.BigEndian.PutUint16(s, uint16(int16(int64(v/float64(ratio)))))
+					case "uint32":
+						b = make([]byte, 4)
+						binary.BigEndian.PutUint32(b, uint32(uint64(v/float64(ratio))))
+					case "int32":
+						b = make([]byte, 4)
+						binary.BigEndian.PutUint32(b, uint32(int32(int64(v/float64(ratio)))))
 					case "float32":
 						s = make([]byte, 4)
 						bits := math.Float32bits(float32(v) / float32(ratio))
@@ -342,6 +379,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					case "int16":
 						s = make([]byte, 2)
 						binary.LittleEndian.PutUint16(s, uint16(int16(int32(v/float32(ratio)))))
+					case "uint32":
+						b = make([]byte, 4)
+						binary.LittleEndian.PutUint32(b, uint32(uint32(v/float32(ratio))))
+					case "int32":
+						b = make([]byte, 4)
+						binary.LittleEndian.PutUint32(b, uint32(int32(int32(v/float32(ratio)))))
 					case "float32":
 						s = make([]byte, 4)
 						bits := math.Float32bits(v / float32(ratio))
@@ -361,6 +404,12 @@ func Value2Byte(storeMode string, quantity int, StoreDataType string, IFDataType
 					case "int16":
 						s = make([]byte, 2)
 						binary.BigEndian.PutUint16(s, uint16(int16(int32(v/float32(ratio)))))
+					case "uint32":
+						b = make([]byte, 4)
+						binary.BigEndian.PutUint32(b, uint32(uint32(v/float32(ratio))))
+					case "int32":
+						b = make([]byte, 4)
+						binary.BigEndian.PutUint32(b, uint32(int32(int32(v/float32(ratio)))))
 					case "float32":
 						s = make([]byte, 4)
 						bits := math.Float32bits(v / float32(ratio))

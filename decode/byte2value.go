@@ -926,6 +926,330 @@ func Byte2Value(storeMode string, quantity int, StoreDataType string, IFDataType
 			}
 		}
 
+	case "uint32":
+		switch strings.ToLower(storeMode) {
+		case "little":
+			if len(b) > 1 {
+
+				switch strings.ToLower(IFDataType) {
+
+				case "int":
+					value := make([]int, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.LittleEndian.Uint32(b[i : i+4]))
+						f := float32(d) * float32(ratio)
+						value = append(value, int(f))
+						runtime.Gosched()
+					}
+					return value
+				case "float32":
+					value := make([]float32, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.LittleEndian.Uint32(b[i : i+4]))
+						f32 := float32(d) * float32(ratio)
+
+						a := strconv.FormatFloat(float64(f32), 'f', prec, 32)
+						f, _ := strconv.ParseFloat(a, 32)
+
+						value = append(value, float32(f))
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "float64":
+					value := make([]float64, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.LittleEndian.Uint32(b[i : i+4]))
+						f64 := float64(d) * float64(ratio)
+
+						a := strconv.FormatFloat(f64, 'f', prec, 64)
+						f, _ := strconv.ParseFloat(a, 64)
+
+						value = append(value, f)
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.LittleEndian.Uint32(b[i : i+4]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "0000000" + s
+						case 2:
+							s = "000000" + s
+						case 3:
+							s = "00000" + s
+						case 4:
+							s = "0000" + s
+						case 5:
+							s = "000" + s
+						case 6:
+							s = "00" + s
+						case 7:
+							s = "0" + s
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
+				}
+
+			}
+
+		case "big":
+			fallthrough
+		default:
+			if len(b) > 1 {
+
+				switch strings.ToLower(IFDataType) {
+				// case "bool":
+				// 	value := make([]bool, 0)
+
+				// 	for i := 0; i+2 <= len(b); i = i + 2 {
+				// 		// for j := 0; j < 8 && quantity > i*8+j; j++ {
+				// 		for j := 0; j < 8; j++ {
+				// 			if (b[i+1]>>j)&0b00000001 == 0b00000001 {
+				// 				value = append(value, true)
+				// 			} else {
+				// 				value = append(value, false)
+				// 			}
+				// 			runtime.Gosched()
+				// 		}
+				// 		for j := 0; j < 8; j++ {
+				// 			if (b[i]>>j)&0b00000001 == 0b00000001 {
+				// 				value = append(value, true)
+				// 			} else {
+				// 				value = append(value, false)
+				// 			}
+				// 			runtime.Gosched()
+				// 		}
+				// 		runtime.Gosched()
+				// 	}
+
+				// 	return value
+				case "int":
+					value := make([]int, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.BigEndian.Uint32(b[i : i+4]))
+						f := float32(d) * float32(ratio)
+						value = append(value, int(f))
+						runtime.Gosched()
+					}
+					return value
+				case "float32":
+					value := make([]float32, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.BigEndian.Uint32(b[i : i+4]))
+						f32 := float32(d) * float32(ratio)
+
+						a := strconv.FormatFloat(float64(f32), 'f', prec, 32)
+						f, _ := strconv.ParseFloat(a, 32)
+						value = append(value, float32(f))
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "float64":
+					value := make([]float64, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.BigEndian.Uint32(b[i : i+4]))
+						f64 := float64(d) * float64(ratio)
+
+						a := strconv.FormatFloat(f64, 'f', prec, 64)
+						f, _ := strconv.ParseFloat(a, 64)
+
+						value = append(value, f)
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.BigEndian.Uint32(b[i : i+4]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "0000000" + s
+						case 2:
+							s = "000000" + s
+						case 3:
+							s = "00000" + s
+						case 4:
+							s = "0000" + s
+						case 5:
+							s = "000" + s
+						case 6:
+							s = "00" + s
+						case 7:
+							s = "0" + s
+
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
+				}
+			}
+		}
+	case "int32":
+		switch strings.ToLower(storeMode) {
+		case "little":
+			if len(b) > 1 {
+
+				switch strings.ToLower(IFDataType) {
+				case "int":
+					value := make([]int, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(int32(binary.LittleEndian.Uint32(b[i : i+4])))
+						f := float32(d) * float32(ratio)
+						value = append(value, int(f))
+						runtime.Gosched()
+					}
+					return value
+				case "float32":
+					value := make([]float32, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(int32(binary.LittleEndian.Uint32(b[i : i+4])))
+						f32 := float32(d) * float32(ratio)
+
+						a := strconv.FormatFloat(float64(f32), 'f', prec, 32)
+						f, _ := strconv.ParseFloat(a, 32)
+
+						value = append(value, float32(f))
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "float64":
+					value := make([]float64, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(int32(binary.LittleEndian.Uint32(b[i : i+4])))
+						f64 := float64(d) * float64(ratio)
+
+						a := strconv.FormatFloat(f64, 'f', prec, 64)
+						f, _ := strconv.ParseFloat(a, 64)
+
+						value = append(value, f)
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.LittleEndian.Uint32(b[i : i+4]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+
+						case 1:
+							s = "0000000" + s
+						case 2:
+							s = "000000" + s
+						case 3:
+							s = "00000" + s
+						case 4:
+							s = "0000" + s
+						case 5:
+							s = "000" + s
+						case 6:
+							s = "00" + s
+						case 7:
+							s = "0" + s
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
+				}
+			}
+		case "big":
+			fallthrough
+		default:
+			if len(b) > 1 {
+
+				switch strings.ToLower(IFDataType) {
+				case "int":
+					value := make([]int, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(int32(binary.BigEndian.Uint32(b[i : i+4])))
+						f := float32(d) * float32(ratio)
+						value = append(value, int(f))
+						runtime.Gosched()
+					}
+					return value
+				case "float32":
+					value := make([]float32, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(int32(binary.BigEndian.Uint32(b[i : i+4])))
+						f32 := float32(d) * float32(ratio)
+
+						a := strconv.FormatFloat(float64(f32), 'f', prec, 32)
+						f, _ := strconv.ParseFloat(a, 32)
+
+						value = append(value, float32(f))
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "float64":
+					value := make([]float64, 0)
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(int32(binary.BigEndian.Uint32(b[i : i+4])))
+						f64 := float64(d) * float64(ratio)
+
+						a := strconv.FormatFloat(f64, 'f', prec, 64)
+						f, _ := strconv.ParseFloat(a, 64)
+
+						value = append(value, f)
+						runtime.Gosched()
+					}
+					// util.FormatOutput(value)
+					return value
+				case "string":
+					value := make([]string, 0)
+					var str string
+					for i := 0; i+4 <= len(b); i = i + 4 {
+						d := int(binary.BigEndian.Uint32(b[i : i+4]))
+						s := strconv.Itoa(int(d))
+
+						switch len(s) {
+						case 1:
+							s = "0000000" + s
+						case 2:
+							s = "000000" + s
+						case 3:
+							s = "00000" + s
+						case 4:
+							s = "0000" + s
+						case 5:
+							s = "000" + s
+						case 6:
+							s = "00" + s
+						case 7:
+							s = "0" + s
+						}
+						str += s
+
+					}
+					value = append(value, str)
+					return value
+				}
+			}
+		}
+
 	case "int64":
 		switch strings.ToLower(storeMode) {
 		case "little":
